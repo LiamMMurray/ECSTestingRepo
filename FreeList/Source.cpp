@@ -10,16 +10,17 @@
 #include "Component.h"
 #include "MemoryLeakDetection.h"
 #include "Pools.h"
+#include "Range.h"
 class TransformComponent : public Component<TransformComponent>
 {
     public:
-		TransformComponent()
-		{
+        TransformComponent()
+        {
                 a = 0;
                 b = 0;
                 c = 0;
                 d = 0;
-		}
+        }
 
         std::vector<int> av;
         float            a;
@@ -157,10 +158,10 @@ int _main()
                         assert(valid_ptr != 0);
                 }
         }
-        for (size_t i = 0; i < 100; i++)
-        {
-                handleManager.AddComponent<TransformComponent>(eHandles[i]);
-        }
+        //for (size_t i = 0; i < 100; i++)
+        //{
+        //        handleManager.AddComponent<TransformComponent>(eHandles[i]);
+        //}
         for (size_t i = 0; i < cHandles.size(); i++)
         {
                 isActivesMap002[cHandles[i]] = cHandles[i].IsActive();
@@ -178,6 +179,36 @@ int _main()
                 }
         }
 
+
+        incrementer = 0;
+		for (auto& e : handleManager.GetComponents<TransformComponent>()) {
+                incrementer++;
+                int pause = 0;
+		}
+
+
+        int* new_data = new int[5];
+        for (auto i = 0; i < 5; i++)
+        {
+                new_data[i] = i * 3;
+        }
+
+        range<int> _range(new_data, 5);
+        for (auto i = _range.begin(); i != _range.end(); i++)
+        {
+                int test  = (*i);
+                int pause = 0;
+        }
+        for (auto& i : _range)
+        {
+                i += 2;
+        }
+        for (auto i = _range.begin(); i != _range.end(); i++)
+        {
+                int test  = (*i);
+                int pause = 0;
+        }
+        delete[] new_data;
         return 0;
 }
 

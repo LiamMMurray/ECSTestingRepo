@@ -1,8 +1,9 @@
 #pragma once
 #include <assert.h>
 #include "Pools.h"
+#include "Range.h"
 #include "SpookyHashV2.h"
-#include "Util.h"
+#include "TypeIndexFactory.h"
 
 struct HandleManager;
 struct Entity;
@@ -84,8 +85,8 @@ struct HandleManager
         NMemory::NPools::pool_descs         pool_descs;
 
         HandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
-                       NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
-                       NMemory::byte*                      dynamic_memory);
+                      NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
+                      NMemory::byte*                      dynamic_memory);
         ~HandleManager();
         template <typename T>
         T* GetComponent(ComponentHandle handle);
@@ -113,7 +114,10 @@ struct HandleManager
 
         void SetIsActive(EntityHandle handle, bool isActive);
 
-		void ShutDown();
+        void ShutDown();
+
+        template <typename T>
+        range<T> GetComponents();
 };
 
 template <typename T>
@@ -146,6 +150,15 @@ inline ComponentHandle HandleManager::AddComponent(EntityHandle parentHandle)
 
         parent_mem->m_OwnedComponents.emplace(componentHandle.pool_index, componentHandle.redirection_index);
         return componentHandle;
+}
+
+template <typename T>
+inline range<T> HandleManager::GetComponents()
+{
+        NMemory::type_index pool_index    = T::SGetTypeIndex();
+        T*                  data          = reinterpret_cast<T*>(component_random_access_pools.m_mem_starts[pool_index]);
+        size_t              element_count = static_cast<size_t>(component_random_access_pools.m_element_counts[pool_index]);
+        return range<T>(data, element_count);
 }
 
 template <typename T>

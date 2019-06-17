@@ -1,7 +1,7 @@
 #pragma once
 #include "IComponent.h"
 #include "Memory.h"
-#include "Util.h"
+#include "TypeIndexFactory.h"
 
 template <typename T>
 class Component : public IComponent

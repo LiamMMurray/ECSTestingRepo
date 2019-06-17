@@ -170,8 +170,9 @@
     <ClInclude Include="MemoryLeakDetection.h" />
     <ClInclude Include="HandleManager.h" />
     <ClInclude Include="Pools.h" />
+    <ClInclude Include="Range.h" />
     <ClInclude Include="SpookyHashV2.h" />
-    <ClInclude Include="Util.h" />
+    <ClInclude Include="TypeIndexFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
