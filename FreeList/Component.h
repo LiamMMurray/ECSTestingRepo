@@ -26,7 +26,6 @@ NMemory::index Component<T>::s_max_elements = 5000;
 template <typename T>
 inline Component<T>::Component()
 {
-        static_assert(std::is_base_of<Component<T>, T>::value, "Components must derive from Component<T>");
 }
 
 template <typename T>
@@ -38,7 +37,6 @@ inline void Component<T>::Init()
 template <typename T>
 inline const NMemory::type_index Component<T>::SGetTypeIndex()
 {
-        static_assert(std::is_base_of<Component<T>, T>::value, "Components must follow derive from Component<T>");
         return s_type_index;
 }
 
