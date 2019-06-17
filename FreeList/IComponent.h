@@ -1,15 +1,14 @@
 #pragma once
 #include "ECSTypes.h"
 #include "HandleManager.h"
-
-class IComponent
+class IPoolElement
 {
-
     public:
-        bool            m_Enabled = true;
-        EntityHandle    m_Owner;
+        NEntityHandle    m_Owner;
         NComponentHandle m_Handle;
-
+};
+class IComponent : IPoolElement
+{
     public:
         IComponent()
         {}
