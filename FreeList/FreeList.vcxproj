@@ -157,6 +157,7 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Pools.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="SpookyHashV2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="MemoryLeakDetection.h" />
     <ClInclude Include="HandleManager.h" />
     <ClInclude Include="Pools.h" />
+    <ClInclude Include="SpookyHashV2.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

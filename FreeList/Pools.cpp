@@ -1,7 +1,7 @@
 #include "Pools.h"
 #include <assert.h>
-#include "IComponent.h"
 #include "HandleManager.h"
+#include "IComponent.h"
 namespace NMemory
 {
         namespace NPools
@@ -48,10 +48,11 @@ namespace NMemory
                                 pools.m_elment_byte_sizes.resize(new_pool_count);
                                 pools.m_element_counts.resize(new_pool_count);
                                 pools.m_mem_starts.resize(new_pool_count);
+                                pools.m_element_isactives.resize(new_pool_count);
                         }
-                        
-						index _i_descs = 0;
-                        index _i_pool = pool_count;
+
+                        index _i_descs = 0;
+                        index _i_pool  = pool_count;
                         for (; _i_pool < new_pool_count; _i_pool++, _i_descs++)
                         {
                                 pools.m_element_capacities[_i_pool] = _pool_descs[_i_descs].element_capacity;
@@ -61,6 +62,7 @@ namespace NMemory
 
                                 index index_count = _pool_descs[_i_descs].element_capacity;
                                 pools.m_redirection_indices[_i_pool].resize(index_count);
+                                pools.m_element_isactives[_i_pool].resize(index_count);
                                 for (index j = 0; j < index_count; j++)
                                 {
                                         pools.m_free_redirection_indices[_i_pool].push(j);
@@ -93,6 +95,7 @@ namespace NMemory
 
                                 index index_count = _pool_desc.element_capacity;
                                 pools.m_redirection_indices[pool_index].resize(index_count);
+                                pools.m_element_isactives[pool_index].resize(index_count);
                                 for (index j = 0; j < index_count; j++)
                                 {
                                         pools.m_free_redirection_indices[pool_index].push(j);
@@ -102,7 +105,8 @@ namespace NMemory
 
                 byte* GetData(RandomAccessPools& component_random_access_pools, index pool_index, index index_buffer_index)
                 {
-                        index element_index = component_random_access_pools.m_redirection_indices[pool_index][index_buffer_index];
+                        index element_index =
+                            component_random_access_pools.m_redirection_indices[pool_index][index_buffer_index];
                         if (element_index == -1)
                                 return 0;
 
@@ -111,7 +115,9 @@ namespace NMemory
 
                         return mem_start + element_index * element_size;
                 }
-                void Free(RandomAccessPools& component_random_access_pools, index pool_index, indices& deleted_redirection_indices)
+                void Free(RandomAccessPools& component_random_access_pools,
+                          index              pool_index,
+                          indices&           deleted_redirection_indices)
                 {
                         memsize element_size       = component_random_access_pools.m_elment_byte_sizes[pool_index];
                         byte*   mem_start          = component_random_access_pools.m_mem_starts[pool_index];
@@ -133,10 +139,14 @@ namespace NMemory
 
                                 // copy over the deleted element's data with last element's data
                                 memcpy(deleted_element_mem, last_element_mem, element_size);
+
+                                // get the handle of the last element that is copying over the deleted element
                                 IComponent*      icomponent          = reinterpret_cast<IComponent*>(last_element_mem);
                                 NComponentHandle last_element_handle = icomponent->m_Handle;
-                                // set the last element's redirection index to the deleted element's redirection index
-                                component_random_access_pools.m_redirection_indices[pool_index][last_element_handle.redirection_index] =
+
+                                // set the last element's redirection value to the deleted element's redirection value
+                                component_random_access_pools
+                                    .m_redirection_indices[pool_index][last_element_handle.redirection_index] =
                                     component_random_access_pools.m_redirection_indices[pool_index][deleted_redirection_index];
 
                                 icomponent->m_Handle.pool_index =
@@ -163,9 +173,12 @@ namespace NMemory
                         byte*   element_mem         = elemement_mem_start + element_index * elemement_size;
                         reinterpret_cast<IComponent*>(element_mem)->m_Handle = NComponentHandle(pool_index, next_free);
 
+                        component_random_access_pools.m_element_isactives[pool_index][next_free] = true;
+
                         component_random_access_pools.m_element_counts[pool_index]++;
                         assert(component_random_access_pools.m_element_counts[pool_index] <=
                                component_random_access_pools.m_element_capacities[pool_index]);
+
                         return next_free;
                 }
 
@@ -175,14 +188,16 @@ namespace NMemory
                 {
                         for (index i = 0; i < redirection_indices.size(); i++)
                         {
-                                if (component_random_access_pools.m_redirection_indices[pool_index][redirection_indices[i]] == -1)
-                                        component_random_access_pools.m_free_redirection_indices[pool_index].push(redirection_indices[i]);
+                                if (component_random_access_pools.m_redirection_indices[pool_index][redirection_indices[i]] ==
+                                    -1)
+                                        component_random_access_pools.m_free_redirection_indices[pool_index].push(
+                                            redirection_indices[i]);
                         }
                 }
 
                 void Clear(RandomAccessPools& component_random_access_pools, index pool_index)
                 {
-                        index element_capacity                           = component_random_access_pools.m_element_capacities[pool_index];
+                        index element_capacity = component_random_access_pools.m_element_capacities[pool_index];
                         component_random_access_pools.m_element_counts[pool_index] = 0;
                         component_random_access_pools.m_free_redirection_indices[pool_index].empty();
                         for (index i = 0; i < element_capacity; i++)

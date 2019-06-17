@@ -5,6 +5,7 @@
 #include <list>
 #include <type_traits>
 #include <typeindex>
+#include <unordered_map>
 #include <vector>
 #include "Component.h"
 #include "MemoryLeakDetection.h"
@@ -41,6 +42,7 @@ index rand_range(index min, index max)
 {
         return static_cast<index>(rand()) % max + min;
 }
+
 index rand_exclude_range(std::vector<index>& indices, index min, index max)
 {
         index out = rand_range(min, max);
@@ -54,7 +56,6 @@ index rand_exclude_range(std::vector<index>& indices, index min, index max)
 
 int _main()
 {
-
         memsize alloc_size_request             = 8000000;
         GameMemory_Singleton::GameMemory_Start = NMemory::ReserveGameMemory(alloc_size_request);
         assert(GameMemory_Singleton::GameMemory_Start != 0);
@@ -64,10 +65,26 @@ int _main()
         RandomAccessPools randomAccessPools;
         NHandleManager    handleManager(randomAccessPools, GameMemory_Singleton::GameMemory_Curr);
         TransformComponent::SetMaxElements(9000);
-        std::vector<NComponentHandle> handles;
+        std::vector<NComponentHandle>              handles;
+        dynamic_bitset                             isActives;
+        std::unordered_map<NComponentHandle, bool> isActivesMap001;
+        std::unordered_map<NComponentHandle, bool> isActivesMap002;
         for (size_t i = 0; i < 1000; i++)
         {
                 handles.push_back(handleManager.AddComponent<TransformComponent>());
+                if (rand() % 2 == 1)
+                {
+                        handles[i].SetIsActive(false);
+                        isActives.push_back(false);
+                        assert(handles[i].IsActive() == false);
+                        isActivesMap001[handles[i]] = false;
+                }
+                else
+                {
+                        isActives.push_back(true);
+                        assert(handles[i].IsActive() == true);
+                        isActivesMap001[handles[i]] = true;
+                }
                 handles[i].Get<TransformComponent>()->a = i;
                 handles[i].Get<TransformComponent>()->b = 1000 + i;
                 handles[i].Get<TransformComponent>()->c = 10000 + i;
@@ -113,16 +130,30 @@ int _main()
         {
                 handleManager.AddComponent<TransformComponent>();
         }
+        for (size_t i = 0; i < handles.size(); i++)
+        {
+
+                isActivesMap002[handles[i]] = handles[i].IsActive();
+        }
+
+        int incrementer = 0;
+        for (auto kv : isActivesMap001)
+        {
+                // this handle is not deleted
+                if (std::find(deleted_handles.begin(), deleted_handles.end(), kv.first.redirection_index) == deleted_handles.end())
+                {
+                        assert(kv.second == isActivesMap002[kv.first]);
+                        incrementer++;
+                }
+        }
+
         return 0;
 }
 
 
 int main()
 {
-
-
         _main();
-
 
         _CrtDumpMemoryLeaks();
 

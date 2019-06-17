@@ -1,7 +1,13 @@
 #pragma once
 #include "Pools.h"
+#include "SpookyHashV2.h"
 #include "Util.h"
 struct NHandleManager;
+
+struct NEntityHandle
+{
+        NMemory::type_index entity_index;
+};
 
 struct NComponentHandle
 {
@@ -24,13 +30,25 @@ struct NComponentHandle
         T* Get();
 
         void Free();
+
+        bool IsActive();
+
+        void SetIsActive(bool isActive);
+
+        bool operator==(const NComponentHandle& other) const;
 };
 
-struct fuck_you_visual_studio
+namespace std
 {
-        int pool_indx;
-        int redirection_index;
-};
+        template <>
+        struct hash<NComponentHandle>
+        {
+                size_t operator()(const NComponentHandle& h) const
+                {
+                        return SpookyHash::Hash64(&h, sizeof(h), 0);
+                }
+        };
+} // namespace std
 
 struct NHandleManager
 {
@@ -50,13 +68,17 @@ struct NHandleManager
 
         void FreeComponent(NComponentHandle handle);
 
-        void ReleaseComponentHandle(NComponentHandle handle);
+        void ReleaseComponentHandle(NComponentHandle cHandle);
+
+        bool IsActive(NComponentHandle cHandle);
+
+        void SetIsActive(NComponentHandle cHandle, bool isActive);
 };
 
 template <typename T>
-inline T* NHandleManager::GetComponent(NComponentHandle handle)
+inline T* NHandleManager::GetComponent(NComponentHandle cHandle)
 {
-        return reinterpret_cast<T*>(GetData(component_random_access_pools, handle.pool_index, handle.redirection_index));
+        return reinterpret_cast<T*>(GetData(component_random_access_pools, cHandle.pool_index, cHandle.redirection_index));
 }
 
 template <typename T>
