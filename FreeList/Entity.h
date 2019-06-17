@@ -1,11 +1,12 @@
 #pragma once
 #include "IEntity.h"
 #include "Util.h"
+
 template <typename T>
 class Entity : public IEntity
 {
     private:
-        static const type_index s_type_index;
+        static const NMemory::type_index s_type_index;
 
     public:
         static const NMemory::type_index SGetTypeIndex();
