@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="HandleManager.cpp" />
+    <ClCompile Include="IEntity.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Pools.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -160,7 +161,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="IComponent.h" />
+    <ClInclude Include="IEntity.h" />
     <ClInclude Include="IPoolElement.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryLeakDetection.h" />

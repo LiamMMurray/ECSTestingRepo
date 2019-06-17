@@ -4,6 +4,6 @@
 class IPoolElement
 {
     public:
-        NEntityHandle    m_Owner;
-        NComponentHandle m_Handle;
+        EntityHandle    m_Owner;
+        ComponentHandle m_Handle;
 };

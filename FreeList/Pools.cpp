@@ -142,7 +142,7 @@ namespace NMemory
 
                                 // get the handle of the last element that is copying over the deleted element
                                 IPoolElement*    pool_element_interface = reinterpret_cast<IPoolElement*>(last_element_mem);
-                                NComponentHandle last_element_handle    = pool_element_interface->m_Handle;
+                                ComponentHandle last_element_handle    = pool_element_interface->m_Handle;
 
                                 // set the last element's redirection value to the deleted element's redirection value
                                 component_random_access_pools
@@ -171,7 +171,7 @@ namespace NMemory
                         byte*   elemement_mem_start = component_random_access_pools.m_mem_starts[pool_index];
                         memsize elemement_size      = component_random_access_pools.m_elment_byte_sizes[pool_index];
                         byte*   element_mem         = elemement_mem_start + element_index * elemement_size;
-                        reinterpret_cast<IPoolElement*>(element_mem)->m_Handle = NComponentHandle(pool_index, next_free);
+                        reinterpret_cast<IPoolElement*>(element_mem)->m_Handle = ComponentHandle(pool_index, next_free);
 
                         component_random_access_pools.m_element_isactives[pool_index][next_free] = true;
 

@@ -4,12 +4,12 @@
 #include "Util.h"
 struct NHandleManager;
 
-struct NEntityHandle
+struct EntityHandle
 {
-        NMemory::type_index entity_index;
+        NMemory::index redirection_index;
 };
 
-struct NComponentHandle
+struct ComponentHandle
 {
     public:
         static NHandleManager* handleContext;
@@ -18,11 +18,11 @@ struct NComponentHandle
         NMemory::type_index pool_index;
         NMemory::index      redirection_index;
 
-        NComponentHandle(NMemory::type_index pool_index, NMemory::index redirection_index) :
+        ComponentHandle(NMemory::type_index pool_index, NMemory::index redirection_index) :
             pool_index(pool_index),
             redirection_index(redirection_index)
         {}
-        NComponentHandle() : pool_index(0), redirection_index(0)
+        ComponentHandle() : pool_index(0), redirection_index(0)
         {}
 
     public:
@@ -35,15 +35,15 @@ struct NComponentHandle
 
         void SetIsActive(bool isActive);
 
-        bool operator==(const NComponentHandle& other) const;
+        bool operator==(const ComponentHandle& other) const;
 };
 
 namespace std
 {
         template <>
-        struct hash<NComponentHandle>
+        struct hash<ComponentHandle>
         {
-                size_t operator()(const NComponentHandle& h) const
+                size_t operator()(const ComponentHandle& h) const
                 {
                         return SpookyHash::Hash64(&h, sizeof(h), 0);
                 }
@@ -54,35 +54,37 @@ struct NHandleManager
 {
         NMemory::index                      pool_count;
         NMemory::NPools::RandomAccessPools& component_random_access_pools;
-        NMemory::NPools::RandomAccessPools  entity_random_access_pools;
+        NMemory::NPools::RandomAccessPools& entity_random_access_pools;
         NMemory::byte*&                     dynamic_memory;
         NMemory::NPools::pool_descs         pool_descs;
 
-        NHandleManager(NMemory::NPools::RandomAccessPools& randomAccesspools, NMemory::byte* dynamic_memory);
+        NHandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
+                       NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
+                       NMemory::byte*                      dynamic_memory);
 
         template <typename T>
-        T* GetComponent(NComponentHandle handle);
+        T* GetComponent(ComponentHandle handle);
 
         template <typename T>
-        NComponentHandle AddComponent();
+        ComponentHandle AddComponent();
 
-        void FreeComponent(NComponentHandle handle);
+        void FreeComponent(ComponentHandle handle);
 
-        void ReleaseComponentHandle(NComponentHandle cHandle);
+        void ReleaseComponentHandle(ComponentHandle cHandle);
 
-        bool IsActive(NComponentHandle cHandle);
+        bool IsActive(ComponentHandle cHandle);
 
-        void SetIsActive(NComponentHandle cHandle, bool isActive);
+        void SetIsActive(ComponentHandle cHandle, bool isActive);
 };
 
 template <typename T>
-inline T* NHandleManager::GetComponent(NComponentHandle cHandle)
+inline T* NHandleManager::GetComponent(ComponentHandle cHandle)
 {
         return reinterpret_cast<T*>(GetData(component_random_access_pools, cHandle.pool_index, cHandle.redirection_index));
 }
 
 template <typename T>
-inline NComponentHandle NHandleManager::AddComponent()
+inline ComponentHandle NHandleManager::AddComponent()
 {
         NMemory::type_index pool_index = T::SGetTypeIndex();
         if (component_random_access_pools.m_mem_starts.size() <= pool_index)
@@ -91,11 +93,11 @@ inline NComponentHandle NHandleManager::AddComponent()
                 InsertPool(component_random_access_pools, {sizeof(T), T::SGetMaxElements()}, dynamic_memory, pool_index);
         }
         NMemory::index redirection_index = Allocate(component_random_access_pools, pool_index);
-        return NComponentHandle(pool_index, redirection_index);
+        return ComponentHandle(pool_index, redirection_index);
 }
 
 template <typename T>
-inline T* NComponentHandle::Get()
+inline T* ComponentHandle::Get()
 {
         return (handleContext->GetComponent<T>(*this));
 }

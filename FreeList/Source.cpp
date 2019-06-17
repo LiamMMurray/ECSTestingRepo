@@ -62,13 +62,16 @@ int _main()
         GameMemory_Singleton::GameMemory_Curr = GameMemory_Singleton::GameMemory_Start;
         GameMemory_Singleton::GameMemory_Max  = GameMemory_Singleton::GameMemory_Start + alloc_size_request;
 
-        RandomAccessPools randomAccessPools;
-        NHandleManager    handleManager(randomAccessPools, GameMemory_Singleton::GameMemory_Curr);
+        RandomAccessPools componentRandomAccessPools;
+        RandomAccessPools entityRandomAccessPools;
+        NHandleManager    handleManager(
+            componentRandomAccessPools, entityRandomAccessPools, GameMemory_Singleton::GameMemory_Curr);
+
         TransformComponent::SSetMaxElements(9000);
-        std::vector<NComponentHandle>              handles;
-        dynamic_bitset                             isActives;
-        std::unordered_map<NComponentHandle, bool> isActivesMap001;
-        std::unordered_map<NComponentHandle, bool> isActivesMap002;
+        std::vector<ComponentHandle>              handles;
+        dynamic_bitset                            isActives;
+        std::unordered_map<ComponentHandle, bool> isActivesMap001;
+        std::unordered_map<ComponentHandle, bool> isActivesMap002;
         for (size_t i = 0; i < 1000; i++)
         {
                 handles.push_back(handleManager.AddComponent<TransformComponent>());
@@ -117,12 +120,12 @@ int _main()
         {
                 if (std::find(deleted_handles.begin(), deleted_handles.end(), i) != deleted_handles.end())
                 {
-                        auto* null_ptr = NComponentHandle(0, i).Get<TransformComponent>();
+                        auto* null_ptr = ComponentHandle(0, i).Get<TransformComponent>();
                         assert(null_ptr == 0);
                 }
                 else
                 {
-                        auto* valid_ptr = NComponentHandle(0, i).Get<TransformComponent>();
+                        auto* valid_ptr = ComponentHandle(0, i).Get<TransformComponent>();
                         assert(valid_ptr != 0);
                 }
         }
@@ -140,7 +143,8 @@ int _main()
         for (auto kv : isActivesMap001)
         {
                 // this handle is not deleted
-                if (std::find(deleted_handles.begin(), deleted_handles.end(), kv.first.redirection_index) == deleted_handles.end())
+                if (std::find(deleted_handles.begin(), deleted_handles.end(), kv.first.redirection_index) ==
+                    deleted_handles.end())
                 {
                         assert(kv.second == isActivesMap002[kv.first]);
                         incrementer++;
