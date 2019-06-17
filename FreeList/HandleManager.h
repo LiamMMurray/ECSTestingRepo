@@ -2,6 +2,7 @@
 #include "Pools.h"
 #include "SpookyHashV2.h"
 #include "Util.h"
+#include <assert.h>
 struct NHandleManager;
 
 struct EntityHandle
@@ -68,6 +69,8 @@ struct NHandleManager
         template <typename T>
         ComponentHandle AddComponent();
 
+		EntityHandle CreateEntity();
+
         void FreeComponent(ComponentHandle handle);
 
         void ReleaseComponentHandle(ComponentHandle cHandle);
@@ -89,11 +92,13 @@ inline ComponentHandle NHandleManager::AddComponent()
         NMemory::type_index pool_index = T::SGetTypeIndex();
         if (component_random_access_pools.m_mem_starts.size() <= pool_index)
         {
-                assert(dynamic_memory + sizeof(T) * T::SGetMaxElements() <= GameMemory_Singleton::GameMemory_Max);
+                assert(dynamic_memory + sizeof(T) * T::SGetMaxElements() <= NMemory::GameMemory_Singleton::GameMemory_Max);
                 InsertPool(component_random_access_pools, {sizeof(T), T::SGetMaxElements()}, dynamic_memory, pool_index);
         }
         NMemory::index redirection_index = Allocate(component_random_access_pools, pool_index);
-        return ComponentHandle(pool_index, redirection_index);
+        ComponentHandle componentHandle(pool_index, redirection_index);
+        new (componentHandle.Get<T>()) T();
+        return componentHandle;
 }
 
 template <typename T>

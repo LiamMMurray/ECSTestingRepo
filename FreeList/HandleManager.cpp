@@ -14,6 +14,20 @@ NHandleManager::NHandleManager(NMemory::NPools::RandomAccessPools& componentRand
         ComponentHandle::handleContext = this;
 }
 
+EntityHandle NHandleManager::CreateEntity()
+{
+        //NMemory::type_index pool_index = 0;
+        //if (component_random_access_pools.m_mem_starts.size() <= pool_index)
+        //{
+        //        assert(dynamic_memory + sizeof(T) * T::SGetMaxElements() <= GameMemory_Singleton::GameMemory_Max);
+        //        InsertPool(component_random_access_pools, {sizeof(T), T::SGetMaxElements()}, dynamic_memory, pool_index);
+        //}
+        //NMemory::index  redirection_index = Allocate(component_random_access_pools, pool_index);
+        //ComponentHandle componentHandle(pool_index, redirection_index);
+        //new (componentHandle.Get<T>()) T();
+        //return componentHandle;
+        return {};
+}
 void NHandleManager::FreeComponent(ComponentHandle cHandle)
 {
         NMemory::indices _adapter = {{cHandle.redirection_index}};

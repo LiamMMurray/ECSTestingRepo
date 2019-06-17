@@ -67,17 +67,6 @@ int _main()
         NHandleManager    handleManager(
             componentRandomAccessPools, entityRandomAccessPools, GameMemory_Singleton::GameMemory_Curr);
 
-		EntityHandle e;
-        Entity       e1;
-        void*        eptr_test = malloc(sizeof(Entity));
-        reinterpret_cast<Entity*>(eptr_test)->Initialize();
-        reinterpret_cast<Entity*>(eptr_test)->GetComponents(0).push_back(1);
-        reinterpret_cast<Entity*>(eptr_test)->ShutDown();
-      
-
-        int pause = 0;
-		//delete eptr_test;
-
         TransformComponent::SSetMaxElements(9000);
         std::vector<ComponentHandle>              handles;
         dynamic_bitset                            isActives;
