@@ -11,3 +11,6 @@ NMemory::index Entity::SGetMaxElements()
 {
         return s_max_elements;
 }
+
+Entity::~Entity()
+{}

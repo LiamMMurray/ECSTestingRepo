@@ -1,10 +1,11 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include <unordered_set>
 #include "IPoolElement.h"
 struct Entity : IPoolElement
 {
-        typedef std::unordered_map<NMemory::type_index, std::vector<NMemory::index>> entityComponentMap;
+        typedef std::unordered_multimap<NMemory::type_index, NMemory::index> entityComponentMap;
 
         static NMemory::index s_max_elements;
 
@@ -13,5 +14,7 @@ struct Entity : IPoolElement
 
         entityComponentMap m_OwnedComponents;
 
-        std::vector<NMemory::index>& GetComponents(NMemory::type_index _type_index);
+		~Entity();
+
+        //std::vector<NMemory::index>& GetComponents(NMemory::type_index _type_index);
 };

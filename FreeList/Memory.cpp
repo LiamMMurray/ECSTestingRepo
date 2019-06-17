@@ -11,8 +11,8 @@ namespace NMemory
 
         byte* ReserveGameMemory(memsize memsize)
         {
-                 return static_cast<byte*>(VirtualAlloc(0, memsize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
-                //return static_cast<byte*>(malloc(memsize));
+                 //return static_cast<byte*>(VirtualAlloc(0, memsize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+                return static_cast<byte*>(malloc(memsize));
         }
         void FreeGameMemory()
         {
@@ -23,5 +23,6 @@ namespace NMemory
                 //                    auto error = GetLastError();
                 //                    assert(false);
                 //}
+                free(GameMemory_Singleton::GameMemory_Start);
         }
 }; // namespace NMemory

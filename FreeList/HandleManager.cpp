@@ -16,12 +16,17 @@ NHandleManager::NHandleManager(NMemory::NPools::RandomAccessPools& componentRand
         EntityHandle::handleContext    = this;
 }
 
+NHandleManager::~NHandleManager()
+{
+        ShutDown();
+}
+
 Entity* NHandleManager::GetEntity(EntityHandle handle)
 {
         return reinterpret_cast<Entity*>(GetData(entity_random_access_pools, 0, handle.redirection_index));
 }
 
-EntityHandle NHandleManager::CreateEntity(EntityHandle parentHandle = -1)
+EntityHandle NHandleManager::CreateEntity(EntityHandle parentHandle)
 {
         NMemory::type_index pool_index = 0;
         if (entity_random_access_pools.m_mem_starts.size() <= pool_index)
@@ -30,11 +35,13 @@ EntityHandle NHandleManager::CreateEntity(EntityHandle parentHandle = -1)
                        NMemory::GameMemory_Singleton::GameMemory_Max);
                 InsertPool(entity_random_access_pools, {sizeof(Entity), Entity::SGetMaxElements()}, dynamic_memory, pool_index);
         }
-        auto         allocation              = Allocate(component_random_access_pools, pool_index);
-        EntityHandle entityHandle            = allocation.redirection_idx;
-        Entity*      objectPtr               = reinterpret_cast<Entity*>(allocation.objectPtr);
-        objectPtr->m_redirection_index       = allocation.redirection_idx;
+        auto         allocation   = Allocate(entity_random_access_pools, pool_index);
+        EntityHandle entityHandle = allocation.redirection_idx;
+        Entity*      objectPtr    = reinterpret_cast<Entity*>(allocation.objectPtr);
+        new (objectPtr) Entity();
+        objectPtr->m_redirection_index        = allocation.redirection_idx;
         objectPtr->m_parent_redirection_index = parentHandle.redirection_index;
+
         return entityHandle;
 }
 
@@ -46,6 +53,7 @@ void NHandleManager::FreeComponent(ComponentHandle handle)
 
 void NHandleManager::FreeEntity(EntityHandle handle)
 {
+        // handle.Get()->~Entity();
         NMemory::indices _adapter = {{handle.redirection_index}};
         Free(entity_random_access_pools, 0, _adapter);
 }
@@ -80,6 +88,12 @@ void NHandleManager::SetIsActive(ComponentHandle handle, bool isActive)
 void NHandleManager::SetIsActive(EntityHandle handle, bool isActive)
 {
         entity_random_access_pools.m_element_isactives[0][handle.redirection_index] = isActive;
+}
+
+void NHandleManager::ShutDown()
+{
+        NMemory::NPools::ClearPools(component_random_access_pools);
+        NMemory::NPools::ClearPools(entity_random_access_pools);
 }
 
 ComponentHandle::ComponentHandle(NMemory::type_index pool_index, NMemory::index redirection_index) :

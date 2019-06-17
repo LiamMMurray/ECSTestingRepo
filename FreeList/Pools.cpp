@@ -1,5 +1,6 @@
 #include "Pools.h"
 #include <assert.h>
+#include <algorithm>
 #include "HandleManager.h"
 #include "IComponent.h"
 namespace NMemory
@@ -92,7 +93,10 @@ namespace NMemory
                                 pools.m_elment_byte_sizes[pool_index]  = _pool_desc.element_size;
                                 pools.m_mem_starts[pool_index]         = dynamic_mem;
                                 dynamic_mem += _pool_desc.element_capacity * _pool_desc.element_size;
-
+                                while ((uint64_t)dynamic_mem % 64 != 0)
+                                {
+                                        dynamic_mem += 1;
+                                }
                                 index index_count = _pool_desc.element_capacity;
                                 pools.m_redirection_indices[pool_index].resize(index_count);
                                 pools.m_element_isactives[pool_index].resize(index_count);
@@ -100,6 +104,53 @@ namespace NMemory
                                 {
                                         pools.m_free_redirection_indices[pool_index].push(j);
                                 }
+                        }
+                }
+
+                void ClearPools(RandomAccessPools& pools, indices pool_indices)
+                {
+                        for (type_index i = 0; i < pool_indices.size(); i++)
+                        {
+                                type_index pool_index        = pool_indices[i];
+                                memsize    element_size      = pools.m_elment_byte_sizes[pool_index];
+                                byte*      element_mem_start = pools.m_mem_starts[pool_index];
+                                index      element_index_end = pools.m_element_counts[pool_index];
+                                //index      element_capacity  = pools.m_element_capacities[pool_index];
+
+                                for (index element_index = 0; element_index < element_index_end; element_index++)
+                                {
+                                        IPoolElement* pool_element_interface =
+                                            reinterpret_cast<IPoolElement*>(element_mem_start + element_index * element_size);
+                                        pool_element_interface->~IPoolElement();
+                                }
+                                pools.m_element_counts[pool_index] = 0;
+
+								// reseting the free redirection indices may be unnecessary
+        //                        pools.m_free_redirection_indices[pool_index].empty();
+								//for (index j = 0; j < element_capacity; j++) {
+        //                                pools.m_free_redirection_indices[pool_index].push(j);
+								//}
+        //                        pools.m_redirection_indices[pool_index].clear();
+                        }
+                }
+
+                void ClearPools(RandomAccessPools& pools)
+                {
+                        type_index pool_count = pools.m_mem_starts.size();
+                        for (type_index i = 0; i < pool_count; i++)
+                        {
+                                type_index pool_index        = i;
+                                memsize    element_size      = pools.m_elment_byte_sizes[pool_index];
+                                byte*      element_mem_start = pools.m_mem_starts[pool_index];
+                                index      element_index_end = pools.m_element_counts[pool_index];
+
+                                for (index element_index = 0; element_index < element_index_end; element_index++)
+                                {
+                                        IPoolElement* pool_element_interface =
+                                            reinterpret_cast<IPoolElement*>(element_mem_start + element_index * element_size);
+                                        pool_element_interface->~IPoolElement();
+                                }
+                                pools.m_element_counts[pool_index] = 0;
                         }
                 }
 
@@ -137,12 +188,16 @@ namespace NMemory
                                 byte* last_element_mem    = mem_start + last_element_index * element_size;
                                 byte* deleted_element_mem = mem_start + deleted_element_index * element_size;
 
+                                // call the element's destructor
+                                IPoolElement* pool_element_interface = reinterpret_cast<IPoolElement*>(deleted_element_mem);
+                                pool_element_interface->~IPoolElement();
+
                                 // copy over the deleted element's data with last element's data
                                 memcpy(deleted_element_mem, last_element_mem, element_size);
 
                                 // get the handle of the last element that is copying over the deleted element
-                                IPoolElement*   pool_element_interface = reinterpret_cast<IPoolElement*>(last_element_mem);
-                                ComponentHandle last_element_handle    = {pool_element_interface->m_pool_index,
+                                pool_element_interface              = reinterpret_cast<IPoolElement*>(last_element_mem);
+                                ComponentHandle last_element_handle = {pool_element_interface->m_pool_index,
                                                                        pool_element_interface->m_redirection_index};
 
                                 // set the last element's redirection value to the deleted element's redirection value
@@ -192,17 +247,6 @@ namespace NMemory
                                     -1)
                                         component_random_access_pools.m_free_redirection_indices[pool_index].push(
                                             redirection_indices[i]);
-                        }
-                }
-
-                void Clear(RandomAccessPools& component_random_access_pools, index pool_index)
-                {
-                        index element_capacity = component_random_access_pools.m_element_capacities[pool_index];
-                        component_random_access_pools.m_element_counts[pool_index] = 0;
-                        component_random_access_pools.m_free_redirection_indices[pool_index].empty();
-                        for (index i = 0; i < element_capacity; i++)
-                        {
-                                component_random_access_pools.m_free_redirection_indices[pool_index].push(i);
                         }
                 }
         } // namespace NPools

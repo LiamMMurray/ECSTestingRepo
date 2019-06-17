@@ -10,14 +10,14 @@
 #include "Component.h"
 #include "MemoryLeakDetection.h"
 #include "Pools.h"
-
 class TransformComponent : public Component<TransformComponent>
 {
     public:
-        float a;
-        float b;
-        float c;
-        float d;
+        std::vector<int> av;
+        float            a;
+        float            b;
+        float            c;
+        float            d;
 };
 
 class PhysicsComponent : public Component<PhysicsComponent>
@@ -53,11 +53,13 @@ index rand_exclude_range(std::vector<index>& indices, index min, index max)
         }
         return out;
 }
-#include "Entity.h"
+
 int _main()
 {
-        memsize alloc_size_request             = 8000000;
+        memsize        alloc_size_request      = 80000000;
+        NMemory::byte* debug_address           = 0;
         GameMemory_Singleton::GameMemory_Start = NMemory::ReserveGameMemory(alloc_size_request);
+        debug_address                          = GameMemory_Singleton::GameMemory_Start;
         assert(GameMemory_Singleton::GameMemory_Start != 0);
         GameMemory_Singleton::GameMemory_Curr = GameMemory_Singleton::GameMemory_Start;
         GameMemory_Singleton::GameMemory_Max  = GameMemory_Singleton::GameMemory_Start + alloc_size_request;
@@ -74,10 +76,14 @@ int _main()
         std::unordered_map<ComponentHandle, bool> isActivesMap001;
         std::unordered_map<ComponentHandle, bool> isActivesMap002;
 
+        for (size_t i = 0; i < 1000; i++)
+        {
+                eHandles.push_back(handleManager.CreateEntity());
+        }
 
         for (size_t i = 0; i < 1000; i++)
         {
-                cHandles.push_back(handleManager.AddComponent<TransformComponent>(-1));
+                cHandles.push_back(handleManager.AddComponent<TransformComponent>(eHandles[0]));
                 if (rand() % 2 == 1)
                 {
                         cHandles[i].SetIsActive(false);
@@ -100,7 +106,7 @@ int _main()
         size_t idx_end    = cHandles.size() + 1000;
         for (size_t i = cHandles.size(); i < idx_end; i++)
         {
-                cHandles.push_back(handleManager.AddComponent<PhysicsComponent>(-1));
+                cHandles.push_back(handleManager.AddComponent<PhysicsComponent>(eHandles[idx_offset]));
                 cHandles[i].Get<PhysicsComponent>()->a000 = idx_offset;
                 cHandles[i].Get<PhysicsComponent>()->a001 = 2000 + idx_offset;
                 cHandles[i].Get<PhysicsComponent>()->b000 = 20000 + idx_offset;
@@ -134,11 +140,10 @@ int _main()
         }
         for (size_t i = 0; i < 100; i++)
         {
-                handleManager.AddComponent<TransformComponent>(-1);
+                handleManager.AddComponent<TransformComponent>(eHandles[i]);
         }
         for (size_t i = 0; i < cHandles.size(); i++)
         {
-
                 isActivesMap002[cHandles[i]] = cHandles[i].IsActive();
         }
 
@@ -161,6 +166,8 @@ int _main()
 int main()
 {
         _main();
+
+        NMemory::FreeGameMemory();
 
         _CrtDumpMemoryLeaks();
 

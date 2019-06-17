@@ -42,6 +42,9 @@ namespace NMemory
 
                 void InsertPool(RandomAccessPools& pools, const Pool_Desc& _pool_desc, byte*& dynamic_mem, index pool_index);
 
+				void ClearPools(RandomAccessPools& pools, indices pool_indices);
+
+                void ClearPools(RandomAccessPools& pools);
 
                 byte* GetData(RandomAccessPools& component_random_access_pools, index pool_index, index data_index);
                 void  Free(RandomAccessPools& component_random_access_pools, index pool_index, indices& index_buffer_indexes);
