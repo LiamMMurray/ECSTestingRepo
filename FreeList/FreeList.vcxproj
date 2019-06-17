@@ -160,7 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h" />
-    <ClInclude Include="Handle.h" />
     <ClInclude Include="IComponent.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryLeakDetection.h" />
