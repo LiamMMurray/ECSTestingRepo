@@ -12,7 +12,6 @@ class Component : public IComponent
 
     public:
         Component();
-        void                             Init();
         const NMemory::type_index        GetTypeIndex() const;
         static const NMemory::type_index SGetTypeIndex();
         static void                      SSetMaxElements(NMemory::index max_elements);
@@ -26,12 +25,6 @@ NMemory::index Component<T>::s_max_elements = 5000;
 template <typename T>
 inline Component<T>::Component()
 {
-}
-
-template <typename T>
-inline void Component<T>::Init()
-{
-        static_cast<T*>(this)->Init();
 }
 
 template <typename T>

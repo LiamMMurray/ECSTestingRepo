@@ -83,7 +83,7 @@ class SpookyHash
         //
         // Init: initialize the context of a SpookyHash
         //
-        void Init(uint64 seed1,  // any 64-bit value will do, including 0
+        void Initialize(uint64 seed1,  // any 64-bit value will do, including 0
                   uint64 seed2); // different seeds produce independent hashes
 
         //

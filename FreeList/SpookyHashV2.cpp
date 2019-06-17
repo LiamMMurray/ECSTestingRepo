@@ -177,7 +177,7 @@ void SpookyHash::Hash128(const void *message, size_t length, uint64 *hash1, uint
 
 
 // init spooky state
-void SpookyHash::Init(uint64 seed1, uint64 seed2)
+void SpookyHash::Initialize(uint64 seed1, uint64 seed2)
 {
         m_length    = 0;
         m_remainder = 0;
