@@ -1,13 +1,5 @@
 #pragma once
-#include "HandleManager.h"
-#include "Memory.h"
-
-class IPoolElement
-{
-    public:
-        NEntityHandle    m_Owner;
-        NComponentHandle m_Handle;
-};
+#include "IPoolElement.h"
 
 class IComponent : IPoolElement
 {
@@ -18,5 +10,5 @@ class IComponent : IPoolElement
         virtual ~IComponent()
         {}
 
-        virtual const NMemory::type_index GetTypeId() const = 0;
+        virtual const NMemory::type_index GetTypeIndex() const = 0;
 };

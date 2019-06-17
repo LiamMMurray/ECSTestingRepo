@@ -64,7 +64,7 @@ int _main()
 
         RandomAccessPools randomAccessPools;
         NHandleManager    handleManager(randomAccessPools, GameMemory_Singleton::GameMemory_Curr);
-        TransformComponent::SetMaxElements(9000);
+        TransformComponent::SSetMaxElements(9000);
         std::vector<NComponentHandle>              handles;
         dynamic_bitset                             isActives;
         std::unordered_map<NComponentHandle, bool> isActivesMap001;

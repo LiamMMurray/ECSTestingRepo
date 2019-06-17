@@ -7,27 +7,21 @@ template <typename T>
 class Component : public IComponent
 {
     private:
-        static const NMemory::type_index m_TypeId;
-        static NMemory::index            m_default_max_elements;
+        static const NMemory::type_index s_type_index;
+        static NMemory::index            s_max_elements;
 
     public:
         Component();
         void                             Init();
-        static const NMemory::type_index SGetTypeId();
-        const NMemory::type_index        GetTypeId() const;
-        static void                      SetMaxElements(NMemory::index max_elements)
-        {
-                m_default_max_elements = max_elements;
-        }
-        static NMemory::index GetMaxElements()
-        {
-                return m_default_max_elements;
-        }
+        const NMemory::type_index        GetTypeIndex() const;
+        static const NMemory::type_index SGetTypeIndex();
+        static void                      SSetMaxElements(NMemory::index max_elements);
+        static NMemory::index            SGetMaxElements();
 };
 template <class T>
-const NMemory::type_index Component<T>::m_TypeId = TypeIdCreator<IComponent>::GetUniqueTypeId<T>();
+const NMemory::type_index Component<T>::s_type_index = TypeIndexFactory<IComponent>::GetTypeIndex<T>();
 template <class T>
-NMemory::index Component<T>::m_default_max_elements = 5000;
+NMemory::index Component<T>::s_max_elements = 5000;
 
 template <typename T>
 inline Component<T>::Component()
@@ -42,14 +36,26 @@ inline void Component<T>::Init()
 }
 
 template <typename T>
-inline const NMemory::type_index Component<T>::SGetTypeId()
+inline const NMemory::type_index Component<T>::SGetTypeIndex()
 {
         static_assert(std::is_base_of<Component<T>, T>::value, "Components must follow derive from Component<T>");
-        return m_TypeId;
+        return s_type_index;
 }
 
 template <typename T>
-inline const NMemory::type_index Component<T>::GetTypeId() const
+inline const NMemory::type_index Component<T>::GetTypeIndex() const
 {
-        return m_TypeId;
+        return s_type_index;
+}
+
+template <typename T>
+inline void Component<T>::SSetMaxElements(NMemory::index max_elements)
+{
+        s_max_elements = max_elements;
+}
+
+template <typename T>
+inline NMemory::index Component<T>::SGetMaxElements()
+{
+        return s_max_elements;
 }

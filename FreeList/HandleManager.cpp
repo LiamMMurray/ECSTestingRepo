@@ -4,7 +4,7 @@
 NHandleManager::NHandleManager(NMemory::NPools::RandomAccessPools& randomAccesspools, NMemory::byte* dynamic_memory) :
     component_random_access_pools(randomAccesspools),
     dynamic_memory(dynamic_memory),
-    pool_count(TypeIdCreator<IComponent>::GetUniqueTypeId<void>())
+    pool_count(TypeIndexFactory<IComponent>::GetTypeIndex<void>())
 // TypeIdCreator<IComponent>::GetUniqueTypeId<void>() gets one past the last pool's index since this is the only place this
 // function is called dynamically, and not statically.
 {
