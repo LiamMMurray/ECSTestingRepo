@@ -1,12 +1,14 @@
 #pragma once
-#include "ECSTypes.h"
 #include "HandleManager.h"
+#include "Memory.h"
+
 class IPoolElement
 {
     public:
         NEntityHandle    m_Owner;
         NComponentHandle m_Handle;
 };
+
 class IComponent : IPoolElement
 {
     public:
@@ -16,12 +18,5 @@ class IComponent : IPoolElement
         virtual ~IComponent()
         {}
 
-
-        EntityHandle                  GetOwner();
-        NComponentHandle              GetHandle();
-        void                          Enable();
-        void                          Disable();
-        void                          SetActive(bool state);
-        bool                          IsEnabled();
-        virtual const ComponentTypeId GetTypeId() const = 0;
+        virtual const NMemory::type_index GetTypeId() const = 0;
 };

@@ -153,7 +153,6 @@
   <ItemGroup>
     <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="HandleManager.cpp" />
-    <ClCompile Include="IComponent.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Pools.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -161,7 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h" />
-    <ClInclude Include="ECSTypes.h" />
     <ClInclude Include="Handle.h" />
     <ClInclude Include="IComponent.h" />
     <ClInclude Include="Memory.h" />

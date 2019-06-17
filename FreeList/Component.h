@@ -7,15 +7,15 @@ template <typename T>
 class Component : public IComponent
 {
     private:
-        static const ComponentTypeId m_TypeId;
-        static NMemory::index        m_default_max_elements;
+        static const NMemory::type_index m_TypeId;
+        static NMemory::index            m_default_max_elements;
 
     public:
         Component();
-        void                         Init();
-        static const ComponentTypeId SGetTypeId();
-        const ComponentTypeId        GetTypeId() const;
-        static void                  SetMaxElements(NMemory::index max_elements)
+        void                             Init();
+        static const NMemory::type_index SGetTypeId();
+        const NMemory::type_index        GetTypeId() const;
+        static void                      SetMaxElements(NMemory::index max_elements)
         {
                 m_default_max_elements = max_elements;
         }
@@ -25,9 +25,9 @@ class Component : public IComponent
         }
 };
 template <class T>
-const ComponentTypeId Component<T>::m_TypeId = TypeIdCreator<IComponent>::GetUniqueTypeId<T>();
+const NMemory::type_index Component<T>::m_TypeId = TypeIdCreator<IComponent>::GetUniqueTypeId<T>();
 template <class T>
-NMemory::index        Component<T>::m_default_max_elements = 5000;
+NMemory::index Component<T>::m_default_max_elements = 5000;
 
 template <typename T>
 inline Component<T>::Component()
@@ -42,14 +42,14 @@ inline void Component<T>::Init()
 }
 
 template <typename T>
-inline const ComponentTypeId Component<T>::SGetTypeId()
+inline const NMemory::type_index Component<T>::SGetTypeId()
 {
         static_assert(std::is_base_of<Component<T>, T>::value, "Components must follow derive from Component<T>");
         return m_TypeId;
 }
 
 template <typename T>
-inline const ComponentTypeId Component<T>::GetTypeId() const
+inline const NMemory::type_index Component<T>::GetTypeId() const
 {
         return m_TypeId;
 }

@@ -84,13 +84,13 @@ inline T* NHandleManager::GetComponent(NComponentHandle cHandle)
 template <typename T>
 inline NComponentHandle NHandleManager::AddComponent()
 {
-        ComponentTypeId pool_index = T::SGetTypeId();
+        NMemory::type_index pool_index = T::SGetTypeId();
         if (component_random_access_pools.m_mem_starts.size() <= pool_index)
         {
                 assert(dynamic_memory + sizeof(T) * T::GetMaxElements() <= GameMemory_Singleton::GameMemory_Max);
                 InsertPool(component_random_access_pools, {sizeof(T), T::GetMaxElements()}, dynamic_memory, pool_index);
         }
-        NMemory::index redirection_index = Allocate(component_random_access_pools, pool_index.m_Data);
+        NMemory::index redirection_index = Allocate(component_random_access_pools, pool_index);
         return NComponentHandle(pool_index, redirection_index);
 }
 

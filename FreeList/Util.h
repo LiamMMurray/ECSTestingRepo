@@ -1,18 +1,16 @@
 #pragma once
-#include "ECSTypes.h"
-
+#include "Memory.h"
 template <typename T>
 class TypeIdCreator
 {
-        static uint32_t m_Count;
+        static NMemory::type_index m_Count;
     public:
         template <typename U>
-        static uint32_t GetUniqueTypeId()
+        static NMemory::type_index GetUniqueTypeId()
         {
-                static const uint32_t increment_once_per_secondary_type{m_Count++};
-                //m_element_size[increment_once_per_secondary_type]
+                static const NMemory::type_index increment_once_per_secondary_type{m_Count++};
                 return increment_once_per_secondary_type;
         }
 };
 template <typename T>
-uint32_t TypeIdCreator<T>::m_Count{0};
+NMemory::type_index TypeIdCreator<T>::m_Count{0};
