@@ -7,6 +7,7 @@ namespace NMemory
 {
         namespace NPools
         {
+                const memsize ForwardAccessPools::s_pool_alignment_boundary = 64;
                 // intializes pool data
                 // mem_start gets modified to be new mem start
                 void AppendPools(ForwardAccessPools& pools, const pool_descs& _pool_descs, byte*& dynamic_mem)
@@ -36,12 +37,12 @@ namespace NMemory
                 // mem_start gets modified to be new mem start
                 void AppendPools(RandomAccessPools& pools, const pool_descs& _pool_descs, byte*& dynamic_mem)
                 {
-                        index pool_count      = pools.m_element_capacities.size();
-                        index pool_desc_count = _pool_descs.size();
-                        index new_pool_count  = pool_count + pool_desc_count;
+                        type_index pool_count      = static_cast<type_index>(pools.m_element_capacities.size());
+                        type_index pool_desc_count = _pool_descs.size();
+                        type_index new_pool_count  = pool_count + pool_desc_count;
 
                         /// resize all element vectors
-                        for (index i = pool_count; i < new_pool_count; i++)
+                        for (type_index i = pool_count; i < new_pool_count; i++)
                         {
                                 pools.m_element_capacities.resize(new_pool_count);
                                 pools.m_redirection_indices.resize(new_pool_count);
@@ -52,8 +53,8 @@ namespace NMemory
                                 pools.m_element_isactives.resize(new_pool_count);
                         }
 
-                        index _i_descs = 0;
-                        index _i_pool  = pool_count;
+                        type_index _i_descs = 0;
+                        type_index _i_pool  = pool_count;
                         for (; _i_pool < new_pool_count; _i_pool++, _i_descs++)
                         {
                                 pools.m_element_capacities[_i_pool] = _pool_descs[_i_descs].element_capacity;
@@ -62,8 +63,8 @@ namespace NMemory
                                 dynamic_mem += _pool_descs[_i_descs].element_capacity * _pool_descs[_i_descs].element_size;
 
                                 index index_count = _pool_descs[_i_descs].element_capacity;
-                                pools.m_redirection_indices[_i_pool].resize(index_count);
-                                pools.m_element_isactives[_i_pool].resize(index_count);
+                                pools.m_redirection_indices[_i_pool].resize(static_cast<size_t>(index_count));
+                                pools.m_element_isactives[_i_pool].resize(static_cast<size_t>(index_count));
                                 for (index j = 0; j < index_count; j++)
                                 {
                                         pools.m_free_redirection_indices[_i_pool].push(j);
@@ -71,9 +72,12 @@ namespace NMemory
                         }
                 }
 
-                void InsertPool(RandomAccessPools& pools, const Pool_Desc& _pool_desc, byte*& dynamic_mem, index pool_index)
+                void InsertPool(RandomAccessPools& pools,
+                                const Pool_Desc&   _pool_desc,
+                                byte*&             dynamic_mem,
+                                type_index         pool_index)
                 {
-                        index pool_count = pools.m_element_capacities.size();
+                        type_index pool_count = pools.m_element_capacities.size();
 
                         if (pool_count <= pool_index)
                         {
@@ -93,7 +97,7 @@ namespace NMemory
                                 pools.m_elment_byte_sizes[pool_index]  = _pool_desc.element_size;
                                 pools.m_mem_starts[pool_index]         = dynamic_mem;
                                 dynamic_mem += _pool_desc.element_capacity * _pool_desc.element_size;
-                                while ((uint64_t)dynamic_mem % 64 != 0)
+                                while ((uint64_t)dynamic_mem % (uint64_t)RandomAccessPools::s_pool_alignment_boundary != 0)
                                 {
                                         dynamic_mem += 1;
                                 }
@@ -107,7 +111,7 @@ namespace NMemory
                         }
                 }
 
-                void ClearPools(RandomAccessPools& pools, indices pool_indices)
+                void ClearPools(RandomAccessPools& pools, type_indices pool_indices)
                 {
                         for (type_index i = 0; i < pool_indices.size(); i++)
                         {
@@ -115,7 +119,6 @@ namespace NMemory
                                 memsize    element_size      = pools.m_elment_byte_sizes[pool_index];
                                 byte*      element_mem_start = pools.m_mem_starts[pool_index];
                                 index      element_index_end = pools.m_element_counts[pool_index];
-                                //index      element_capacity  = pools.m_element_capacities[pool_index];
 
                                 for (index element_index = 0; element_index < element_index_end; element_index++)
                                 {
@@ -124,13 +127,6 @@ namespace NMemory
                                         pool_element_interface->~IPoolElement();
                                 }
                                 pools.m_element_counts[pool_index] = 0;
-
-								// reseting the free redirection indices may be unnecessary
-        //                        pools.m_free_redirection_indices[pool_index].empty();
-								//for (index j = 0; j < element_capacity; j++) {
-        //                                pools.m_free_redirection_indices[pool_index].push(j);
-								//}
-        //                        pools.m_redirection_indices[pool_index].clear();
                         }
                 }
 
@@ -166,6 +162,7 @@ namespace NMemory
 
                         return mem_start + element_index * element_size;
                 }
+
                 void Free(RandomAccessPools& component_random_access_pools,
                           index              pool_index,
                           indices&           deleted_redirection_indices)

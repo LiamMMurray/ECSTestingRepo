@@ -13,6 +13,14 @@
 class TransformComponent : public Component<TransformComponent>
 {
     public:
+		TransformComponent()
+		{
+                a = 0;
+                b = 0;
+                c = 0;
+                d = 0;
+		}
+
         std::vector<int> av;
         float            a;
         float            b;
@@ -23,6 +31,18 @@ class TransformComponent : public Component<TransformComponent>
 class PhysicsComponent : public Component<PhysicsComponent>
 {
     public:
+        PhysicsComponent()
+        {
+                a000 = 0;
+                a001 = 0;
+                b000 = 0;
+                b001 = 0;
+                c000 = 0;
+                c001 = 0;
+                d000 = 0;
+                d001 = 0;
+        }
+
         float a000;
         float a001;
         float b000;
@@ -66,8 +86,7 @@ int _main()
 
         RandomAccessPools componentRandomAccessPools;
         RandomAccessPools entityRandomAccessPools;
-        NHandleManager    handleManager(
-            componentRandomAccessPools, entityRandomAccessPools, GameMemory_Singleton::GameMemory_Curr);
+        HandleManager handleManager(componentRandomAccessPools, entityRandomAccessPools, GameMemory_Singleton::GameMemory_Curr);
 
         TransformComponent::SSetMaxElements(9000);
         std::vector<ComponentHandle>              cHandles;

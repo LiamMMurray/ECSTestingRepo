@@ -2,7 +2,7 @@
 #include "Entity.h"
 #include "IComponent.h"
 
-NHandleManager::NHandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
+HandleManager::HandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
                                NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
                                NMemory::byte*                      dynamic_memory) :
     component_random_access_pools(componentRandomAccessPools),
@@ -16,17 +16,17 @@ NHandleManager::NHandleManager(NMemory::NPools::RandomAccessPools& componentRand
         EntityHandle::handleContext    = this;
 }
 
-NHandleManager::~NHandleManager()
+HandleManager::~HandleManager()
 {
         ShutDown();
 }
 
-Entity* NHandleManager::GetEntity(EntityHandle handle)
+Entity* HandleManager::GetEntity(EntityHandle handle)
 {
         return reinterpret_cast<Entity*>(GetData(entity_random_access_pools, 0, handle.redirection_index));
 }
 
-EntityHandle NHandleManager::CreateEntity(EntityHandle parentHandle)
+EntityHandle HandleManager::CreateEntity(EntityHandle parentHandle)
 {
         NMemory::type_index pool_index = 0;
         if (entity_random_access_pools.m_mem_starts.size() <= pool_index)
@@ -45,52 +45,52 @@ EntityHandle NHandleManager::CreateEntity(EntityHandle parentHandle)
         return entityHandle;
 }
 
-void NHandleManager::FreeComponent(ComponentHandle handle)
+void HandleManager::FreeComponent(ComponentHandle handle)
 {
         NMemory::indices _adapter = {{handle.redirection_index}};
         Free(component_random_access_pools, handle.pool_index, _adapter);
 }
 
-void NHandleManager::FreeEntity(EntityHandle handle)
+void HandleManager::FreeEntity(EntityHandle handle)
 {
         // handle.Get()->~Entity();
         NMemory::indices _adapter = {{handle.redirection_index}};
         Free(entity_random_access_pools, 0, _adapter);
 }
 
-void NHandleManager::ReleaseComponentHandle(ComponentHandle handle)
+void HandleManager::ReleaseComponentHandle(ComponentHandle handle)
 {
         NMemory::indices _adapter = {{handle.redirection_index}};
         ReleaseRedirectionIndices(component_random_access_pools, handle.pool_index, _adapter);
 }
 
-void NHandleManager::ReleaseEntityHandle(EntityHandle handle)
+void HandleManager::ReleaseEntityHandle(EntityHandle handle)
 {
         NMemory::indices _adapter = {{handle.redirection_index}};
         ReleaseRedirectionIndices(entity_random_access_pools, 0, _adapter);
 }
 
-bool NHandleManager::IsActive(ComponentHandle handle)
+bool HandleManager::IsActive(ComponentHandle handle)
 {
         return component_random_access_pools.m_element_isactives[handle.pool_index][handle.redirection_index];
 }
 
-bool NHandleManager::IsActive(EntityHandle handle)
+bool HandleManager::IsActive(EntityHandle handle)
 {
         return entity_random_access_pools.m_element_isactives[0][handle.redirection_index];
 }
 
-void NHandleManager::SetIsActive(ComponentHandle handle, bool isActive)
+void HandleManager::SetIsActive(ComponentHandle handle, bool isActive)
 {
         component_random_access_pools.m_element_isactives[handle.pool_index][handle.redirection_index] = isActive;
 }
 
-void NHandleManager::SetIsActive(EntityHandle handle, bool isActive)
+void HandleManager::SetIsActive(EntityHandle handle, bool isActive)
 {
         entity_random_access_pools.m_element_isactives[0][handle.redirection_index] = isActive;
 }
 
-void NHandleManager::ShutDown()
+void HandleManager::ShutDown()
 {
         NMemory::NPools::ClearPools(component_random_access_pools);
         NMemory::NPools::ClearPools(entity_random_access_pools);
@@ -101,7 +101,7 @@ ComponentHandle::ComponentHandle(NMemory::type_index pool_index, NMemory::index 
     redirection_index(redirection_index)
 {}
 
-ComponentHandle::ComponentHandle()
+ComponentHandle::ComponentHandle() : pool_index(0), redirection_index(0)
 {}
 
 void ComponentHandle::Free()
@@ -155,5 +155,5 @@ bool EntityHandle::operator==(const EntityHandle& other) const
 }
 
 
-NHandleManager* ComponentHandle::handleContext = 0;
-NHandleManager* EntityHandle::handleContext    = 0;
+HandleManager* ComponentHandle::handleContext = 0;
+HandleManager* EntityHandle::handleContext    = 0;

@@ -4,15 +4,15 @@
 #include "SpookyHashV2.h"
 #include "Util.h"
 
-struct NHandleManager;
+struct HandleManager;
 struct Entity;
 class IPoolElement;
 
 struct EntityHandle
 {
     public:
-        static NHandleManager* handleContext;
-        friend struct NHandleManager;
+        static HandleManager* handleContext;
+        friend struct HandleManager;
 
         NMemory::index redirection_index;
 
@@ -33,8 +33,8 @@ struct EntityHandle
 struct ComponentHandle
 {
     public:
-        static NHandleManager* handleContext;
-        friend struct NHandleManager;
+        static HandleManager* handleContext;
+        friend struct HandleManager;
 
         NMemory::type_index pool_index;
         NMemory::index      redirection_index;
@@ -75,7 +75,7 @@ namespace std
         };
 } // namespace std
 
-struct NHandleManager
+struct HandleManager
 {
         NMemory::index                      pool_count;
         NMemory::NPools::RandomAccessPools& component_random_access_pools;
@@ -83,10 +83,10 @@ struct NHandleManager
         NMemory::byte*&                     dynamic_memory;
         NMemory::NPools::pool_descs         pool_descs;
 
-        NHandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
+        HandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
                        NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
                        NMemory::byte*                      dynamic_memory);
-        ~NHandleManager();
+        ~HandleManager();
         template <typename T>
         T* GetComponent(ComponentHandle handle);
 
@@ -117,13 +117,13 @@ struct NHandleManager
 };
 
 template <typename T>
-inline T* NHandleManager::GetComponent(ComponentHandle cHandle)
+inline T* HandleManager::GetComponent(ComponentHandle cHandle)
 {
         return reinterpret_cast<T*>(GetData(component_random_access_pools, cHandle.pool_index, cHandle.redirection_index));
 }
 #include "Entity.h"
 template <typename T>
-inline ComponentHandle NHandleManager::AddComponent(EntityHandle parentHandle)
+inline ComponentHandle HandleManager::AddComponent(EntityHandle parentHandle)
 {
         NMemory::type_index pool_index = T::SGetTypeIndex();
         if (component_random_access_pools.m_mem_starts.size() <= pool_index)
