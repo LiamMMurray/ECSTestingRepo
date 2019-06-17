@@ -125,7 +125,7 @@ class SpookyHash
         //   When run forward or backwards one Mix
         // I tried 3 pairs of each; they all differed by at least 212 bits.
         //
-        static INLINE void Mix(const uint64 *data,
+        static INLINE void Mix(const uint64 *objectPtr,
                                uint64 &      s0,
                                uint64 &      s1,
                                uint64 &      s2,
@@ -139,62 +139,62 @@ class SpookyHash
                                uint64 &      s10,
                                uint64 &      s11)
         {
-                s0 += data[0];
+                s0 += objectPtr[0];
                 s2 ^= s10;
                 s11 ^= s0;
                 s0 = Rot64(s0, 11);
                 s11 += s1;
-                s1 += data[1];
+                s1 += objectPtr[1];
                 s3 ^= s11;
                 s0 ^= s1;
                 s1 = Rot64(s1, 32);
                 s0 += s2;
-                s2 += data[2];
+                s2 += objectPtr[2];
                 s4 ^= s0;
                 s1 ^= s2;
                 s2 = Rot64(s2, 43);
                 s1 += s3;
-                s3 += data[3];
+                s3 += objectPtr[3];
                 s5 ^= s1;
                 s2 ^= s3;
                 s3 = Rot64(s3, 31);
                 s2 += s4;
-                s4 += data[4];
+                s4 += objectPtr[4];
                 s6 ^= s2;
                 s3 ^= s4;
                 s4 = Rot64(s4, 17);
                 s3 += s5;
-                s5 += data[5];
+                s5 += objectPtr[5];
                 s7 ^= s3;
                 s4 ^= s5;
                 s5 = Rot64(s5, 28);
                 s4 += s6;
-                s6 += data[6];
+                s6 += objectPtr[6];
                 s8 ^= s4;
                 s5 ^= s6;
                 s6 = Rot64(s6, 39);
                 s5 += s7;
-                s7 += data[7];
+                s7 += objectPtr[7];
                 s9 ^= s5;
                 s6 ^= s7;
                 s7 = Rot64(s7, 57);
                 s6 += s8;
-                s8 += data[8];
+                s8 += objectPtr[8];
                 s10 ^= s6;
                 s7 ^= s8;
                 s8 = Rot64(s8, 55);
                 s7 += s9;
-                s9 += data[9];
+                s9 += objectPtr[9];
                 s11 ^= s7;
                 s8 ^= s9;
                 s9 = Rot64(s9, 54);
                 s8 += s10;
-                s10 += data[10];
+                s10 += objectPtr[10];
                 s0 ^= s8;
                 s9 ^= s10;
                 s10 = Rot64(s10, 22);
                 s9 += s11;
-                s11 += data[11];
+                s11 += objectPtr[11];
                 s1 ^= s9;
                 s10 ^= s11;
                 s11 = Rot64(s11, 46);
@@ -268,7 +268,7 @@ class SpookyHash
                 h0 = Rot64(h0, 54);
         }
 
-        static INLINE void End(const uint64 *data,
+        static INLINE void End(const uint64 *objectPtr,
                                uint64 &      h0,
                                uint64 &      h1,
                                uint64 &      h2,
@@ -282,18 +282,18 @@ class SpookyHash
                                uint64 &      h10,
                                uint64 &      h11)
         {
-                h0 += data[0];
-                h1 += data[1];
-                h2 += data[2];
-                h3 += data[3];
-                h4 += data[4];
-                h5 += data[5];
-                h6 += data[6];
-                h7 += data[7];
-                h8 += data[8];
-                h9 += data[9];
-                h10 += data[10];
-                h11 += data[11];
+                h0 += objectPtr[0];
+                h1 += objectPtr[1];
+                h2 += objectPtr[2];
+                h3 += objectPtr[3];
+                h4 += objectPtr[4];
+                h5 += objectPtr[5];
+                h6 += objectPtr[6];
+                h7 += objectPtr[7];
+                h8 += objectPtr[8];
+                h9 += objectPtr[9];
+                h10 += objectPtr[10];
+                h11 += objectPtr[11];
                 EndPartial(h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
                 EndPartial(h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
                 EndPartial(h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);

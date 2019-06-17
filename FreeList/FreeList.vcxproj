@@ -154,6 +154,8 @@
     <ClCompile Include="FreeList.cpp" />
     <ClCompile Include="HandleManager.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="IComponent.cpp" />
+    <ClCompile Include="IPoolElement.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="Pools.cpp" />
     <ClCompile Include="Source.cpp" />

@@ -1,9 +1,9 @@
 #pragma once
-#include "HandleManager.h"
-
+#include "Memory.h"
 class IPoolElement
 {
     public:
-        EntityHandle    m_Owner;
-        ComponentHandle m_Handle;
+        NMemory::index      m_parent_redirection_index;
+        NMemory::index      m_redirection_index;
+        NMemory::type_index m_pool_index;
 };

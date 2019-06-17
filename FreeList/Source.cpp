@@ -68,53 +68,56 @@ int _main()
             componentRandomAccessPools, entityRandomAccessPools, GameMemory_Singleton::GameMemory_Curr);
 
         TransformComponent::SSetMaxElements(9000);
-        std::vector<ComponentHandle>              handles;
+        std::vector<ComponentHandle>              cHandles;
+        std::vector<EntityHandle>                 eHandles;
         dynamic_bitset                            isActives;
         std::unordered_map<ComponentHandle, bool> isActivesMap001;
         std::unordered_map<ComponentHandle, bool> isActivesMap002;
+
+
         for (size_t i = 0; i < 1000; i++)
         {
-                handles.push_back(handleManager.AddComponent<TransformComponent>());
+                cHandles.push_back(handleManager.AddComponent<TransformComponent>(-1));
                 if (rand() % 2 == 1)
                 {
-                        handles[i].SetIsActive(false);
+                        cHandles[i].SetIsActive(false);
                         isActives.push_back(false);
-                        assert(handles[i].IsActive() == false);
-                        isActivesMap001[handles[i]] = false;
+                        assert(cHandles[i].IsActive() == false);
+                        isActivesMap001[cHandles[i]] = false;
                 }
                 else
                 {
                         isActives.push_back(true);
-                        assert(handles[i].IsActive() == true);
-                        isActivesMap001[handles[i]] = true;
+                        assert(cHandles[i].IsActive() == true);
+                        isActivesMap001[cHandles[i]] = true;
                 }
-                handles[i].Get<TransformComponent>()->a = i;
-                handles[i].Get<TransformComponent>()->b = 1000 + i;
-                handles[i].Get<TransformComponent>()->c = 10000 + i;
-                handles[i].Get<TransformComponent>()->d = 100000 + i;
+                cHandles[i].Get<TransformComponent>()->a = i;
+                cHandles[i].Get<TransformComponent>()->b = 1000 + i;
+                cHandles[i].Get<TransformComponent>()->c = 10000 + i;
+                cHandles[i].Get<TransformComponent>()->d = 100000 + i;
         }
         size_t idx_offset = 0;
-        size_t idx_end    = handles.size() + 1000;
-        for (size_t i = handles.size(); i < idx_end; i++)
+        size_t idx_end    = cHandles.size() + 1000;
+        for (size_t i = cHandles.size(); i < idx_end; i++)
         {
-                handles.push_back(handleManager.AddComponent<PhysicsComponent>());
-                handles[i].Get<PhysicsComponent>()->a000 = idx_offset;
-                handles[i].Get<PhysicsComponent>()->a001 = 2000 + idx_offset;
-                handles[i].Get<PhysicsComponent>()->b000 = 20000 + idx_offset;
-                handles[i].Get<PhysicsComponent>()->b001 = 200000 + idx_offset;
-                handles[i].Get<PhysicsComponent>()->c000 = 999999;
-                handles[i].Get<PhysicsComponent>()->c001 = 999999;
-                handles[i].Get<PhysicsComponent>()->d000 = 777777;
-                handles[i].Get<PhysicsComponent>()->d001 = 777777;
+                cHandles.push_back(handleManager.AddComponent<PhysicsComponent>(-1));
+                cHandles[i].Get<PhysicsComponent>()->a000 = idx_offset;
+                cHandles[i].Get<PhysicsComponent>()->a001 = 2000 + idx_offset;
+                cHandles[i].Get<PhysicsComponent>()->b000 = 20000 + idx_offset;
+                cHandles[i].Get<PhysicsComponent>()->b001 = 200000 + idx_offset;
+                cHandles[i].Get<PhysicsComponent>()->c000 = 999999;
+                cHandles[i].Get<PhysicsComponent>()->c001 = 999999;
+                cHandles[i].Get<PhysicsComponent>()->d000 = 777777;
+                cHandles[i].Get<PhysicsComponent>()->d001 = 777777;
                 idx_offset++;
         }
-        index              max_handle_index = handles.back().redirection_index;
+        index              max_handle_index = cHandles.back().redirection_index;
         std::vector<index> deleted_handles;
         for (size_t i = 0; i < 100; i++)
         {
                 index idx = rand_exclude_range(deleted_handles, 0, max_handle_index);
                 deleted_handles.push_back(idx);
-                handles[idx].Free();
+                cHandles[idx].Free();
         }
         for (size_t i = 0; i < 1000; i++)
         {
@@ -131,12 +134,12 @@ int _main()
         }
         for (size_t i = 0; i < 100; i++)
         {
-                handleManager.AddComponent<TransformComponent>();
+                handleManager.AddComponent<TransformComponent>(-1);
         }
-        for (size_t i = 0; i < handles.size(); i++)
+        for (size_t i = 0; i < cHandles.size(); i++)
         {
 
-                isActivesMap002[handles[i]] = handles[i].IsActive();
+                isActivesMap002[cHandles[i]] = cHandles[i].IsActive();
         }
 
         int incrementer = 0;

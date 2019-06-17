@@ -302,7 +302,7 @@ void SpookyHash::Final(uint64 *hash1, uint64 *hash2)
                 return;
         }
 
-        const uint64 *data      = (const uint64 *)m_data;
+        const uint64 *objectPtr      = (const uint64 *)m_data;
         uint8         remainder = m_remainder;
 
         uint64 h0  = m_state[0];
@@ -321,18 +321,18 @@ void SpookyHash::Final(uint64 *hash1, uint64 *hash2)
         if (remainder >= sc_blockSize)
         {
                 // m_data can contain two blocks; handle any whole first block
-                Mix(data, h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
-                data += sc_numVars;
+                Mix(objectPtr, h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
+                objectPtr += sc_numVars;
                 remainder -= sc_blockSize;
         }
 
         // mix in the last partial block, and the length mod sc_blockSize
-        memset(&((uint8 *)data)[remainder], 0, (sc_blockSize - remainder));
+        memset(&((uint8 *)objectPtr)[remainder], 0, (sc_blockSize - remainder));
 
-        ((uint8 *)data)[sc_blockSize - 1] = remainder;
+        ((uint8 *)objectPtr)[sc_blockSize - 1] = remainder;
 
         // do some final mixing
-        End(data, h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
+        End(objectPtr, h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11);
 
         *hash1 = h0;
         *hash2 = h1;

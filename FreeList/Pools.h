@@ -15,20 +15,26 @@ namespace NMemory
 
                 struct ForwardAccessPools
                 {
-                        std::vector<byte*>          m_mem_starts;
-                        std::vector<index>          m_element_counts;
-                        std::vector<memsize>        m_elment_byte_sizes;
-                        std::vector<index>          m_element_capacities;
-						// these bitsets are associated with the m_redirection_indices in a random access pool
-						// and are associated with the straight forward index in a forward access pool
+                        std::vector<byte*>   m_mem_starts;
+                        std::vector<index>   m_element_counts;
+                        std::vector<memsize> m_elment_byte_sizes;
+                        std::vector<index>   m_element_capacities;
+                        // these bitsets are associated with the m_redirection_indices in a random access pool
+                        // and are associated with the straight forward index in a forward access pool
                         std::vector<dynamic_bitset> m_element_isactives;
+                };
+
+                struct Allocation
+                {
+                        index      redirection_idx;
+                        byte*      objectPtr;
                 };
 
                 void AppendPools(ForwardAccessPools& pools, const pool_descs& _pool_descs, byte*& dynamic_mem);
 
                 struct RandomAccessPools : public ForwardAccessPools
                 {
-                        std::vector<indices>              m_redirection_indices; // redirection_and_isactive_indices would be more accurate
+                        std::vector<indices> m_redirection_indices; // redirection_and_isactive_indices would be more accurate
                         std::vector<index_priority_queue> m_free_redirection_indices;
                 };
 
@@ -39,10 +45,10 @@ namespace NMemory
 
                 byte* GetData(RandomAccessPools& component_random_access_pools, index pool_index, index data_index);
                 void  Free(RandomAccessPools& component_random_access_pools, index pool_index, indices& index_buffer_indexes);
-                index Allocate(RandomAccessPools& component_random_access_pools, index pool_index);
-                void  ReleaseRedirectionIndices(RandomAccessPools& component_random_access_pools,
-                                                index              pool_index,
-                                                indices&           redirection_indices);
+                Allocation Allocate(RandomAccessPools& component_random_access_pools, index pool_index);
+                void       ReleaseRedirectionIndices(RandomAccessPools& component_random_access_pools,
+                                                     index              pool_index,
+                                                     indices&           redirection_indices);
 
 
                 // intializes pool data
