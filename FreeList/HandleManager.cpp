@@ -127,7 +127,7 @@ void EntityHandle::Free()
 
 bool EntityHandle::IsActive()
 {
-        handleContext->IsActive(*this);
+        return handleContext->IsActive(*this);
 }
 
 void EntityHandle::SetIsActive(bool isActive)
