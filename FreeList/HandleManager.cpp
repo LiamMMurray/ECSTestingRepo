@@ -72,22 +72,36 @@ void HandleManager::ReleaseEntityHandle(EntityHandle handle)
 
 bool HandleManager::IsActive(ComponentHandle handle)
 {
-        return component_random_access_pools.m_element_isactives[handle.pool_index][handle.redirection_index];
+        NMemory::index element_index =
+            component_random_access_pools.m_redirection_indices[handle.pool_index][handle.redirection_index];
+        if (element_index == -1)
+                return false;
+        return component_random_access_pools.m_element_isactives[handle.pool_index][element_index];
 }
 
 bool HandleManager::IsActive(EntityHandle handle)
 {
-        return entity_random_access_pools.m_element_isactives[0][handle.redirection_index];
+        NMemory::index element_index = component_random_access_pools.m_redirection_indices[0][handle.redirection_index];
+        if (element_index == -1)
+                return false;
+        return entity_random_access_pools.m_element_isactives[0][element_index];
 }
 
 void HandleManager::SetIsActive(ComponentHandle handle, bool isActive)
 {
-        component_random_access_pools.m_element_isactives[handle.pool_index][handle.redirection_index] = isActive;
+        NMemory::index element_index =
+            component_random_access_pools.m_redirection_indices[handle.pool_index][handle.redirection_index];
+        if (element_index == -1)
+                return;
+        component_random_access_pools.m_element_isactives[handle.pool_index][element_index] = isActive;
 }
 
 void HandleManager::SetIsActive(EntityHandle handle, bool isActive)
 {
-        entity_random_access_pools.m_element_isactives[0][handle.redirection_index] = isActive;
+        NMemory::index element_index = component_random_access_pools.m_redirection_indices[0][handle.redirection_index];
+        if (element_index == -1)
+                return;
+        entity_random_access_pools.m_element_isactives[0][element_index] = isActive;
 }
 
 void HandleManager::ShutDown()
@@ -101,6 +115,15 @@ range<Entity> HandleManager::GetEntities()
         Entity* data          = reinterpret_cast<Entity*>(entity_random_access_pools.m_mem_starts[0]);
         size_t  element_count = static_cast<size_t>(entity_random_access_pools.m_element_counts[0]);
         return range<Entity>(data, element_count);
+}
+
+active_range<Entity> HandleManager::GetActiveEntities()
+{
+        NMemory::type_index      pool_index    = 0;
+        Entity*                  data          = reinterpret_cast<Entity*>(entity_random_access_pools.m_mem_starts[0]);
+        size_t                   element_count = static_cast<size_t>(entity_random_access_pools.m_element_counts[0]);
+        NMemory::dynamic_bitset& isActives     = entity_random_access_pools.m_element_isactives[0];
+        return active_range<Entity>(data, element_count, isActives);
 }
 
 ComponentHandle::ComponentHandle(NMemory::type_index pool_index, NMemory::index redirection_index) :
@@ -133,6 +156,12 @@ bool ComponentHandle::operator==(const ComponentHandle& other) const
         return other.pool_index == this->pool_index && other.redirection_index == this->redirection_index;
 }
 
+EntityHandle ComponentHandle::GetParent()
+{
+        NMemory::index parent_index = this->Get()->m_parent_redirection_index;
+        return EntityHandle(parent_index);
+}
+
 EntityHandle::EntityHandle(NMemory::index redirection_index) : redirection_index(redirection_index)
 {}
 
@@ -160,6 +189,20 @@ bool EntityHandle::operator==(const EntityHandle& other) const
 {
         return this->redirection_index == other.redirection_index;
 }
+
+void EntityHandle::FreeComponents()
+{
+        for (auto& e : this->Get()->m_OwnedComponents)
+        {
+                ComponentHandle(e.first, e.second).Free();
+        }
+}
+
+// EntityHandle EntityHandle::GetParent()
+//{
+//        NMemory::index parent_index = this->Get()->m_parent_redirection_index;
+//        return EntityHandle(parent_index);
+//}
 
 
 HandleManager* ComponentHandle::handleContext = 0;

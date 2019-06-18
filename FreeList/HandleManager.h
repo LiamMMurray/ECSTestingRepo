@@ -5,6 +5,7 @@
 #include "Range.h"
 #include "SpookyHashV2.h"
 #include "TypeIndexFactory.h"
+#include "IPoolElement.h"
 struct HandleManager;
 struct Entity;
 class IPoolElement;
@@ -34,8 +35,12 @@ struct EntityHandle
         template <typename T>
         std::vector<ComponentHandle> GetComponents();
 
+		void FreeComponents();
+
         template <typename T>
         ComponentHandle GetComponent();
+
+		//EntityHandle GetParent();
 };
 
 struct ComponentHandle
@@ -51,7 +56,7 @@ struct ComponentHandle
         ComponentHandle();
 
     public:
-        template <typename T>
+        template <typename T = IPoolElement>
         T* Get();
 
         void Free();
@@ -61,6 +66,8 @@ struct ComponentHandle
         void SetIsActive(bool isActive);
 
         bool operator==(const ComponentHandle& other) const;
+
+		EntityHandle GetParent();
 };
 
 namespace std
@@ -126,7 +133,12 @@ struct HandleManager
         template <typename T>
         range<T> GetComponents();
 
+        template <typename T>
+        active_range<T> GetActiveComponents();
+
         range<Entity> GetEntities();
+
+		active_range<Entity> GetActiveEntities();
 };
 
 template <typename T>
@@ -142,6 +154,16 @@ inline range<T> HandleManager::GetComponents()
         T*                  data          = reinterpret_cast<T*>(component_random_access_pools.m_mem_starts[pool_index]);
         size_t              element_count = static_cast<size_t>(component_random_access_pools.m_element_counts[pool_index]);
         return range<T>(data, element_count);
+}
+
+template <typename T>
+inline active_range<T> HandleManager::GetActiveComponents()
+{
+        NMemory::type_index pool_index     = T::SGetTypeIndex();
+        T*                  data           = reinterpret_cast<T*>(component_random_access_pools.m_mem_starts[pool_index]);
+        size_t              element_count  = static_cast<size_t>(component_random_access_pools.m_element_counts[pool_index]);
+        NMemory::dynamic_bitset& isActives = component_random_access_pools.m_element_isactives[pool_index];
+        return active_range<T>(data, element_count, isActives);
 }
 
 template <typename T>
@@ -180,12 +202,12 @@ inline ComponentHandle HandleManager::AddComponent(EntityHandle parentHandle)
 template <typename T>
 inline std::vector<ComponentHandle> EntityHandle::GetComponents()
 {
-        NMemory::type_index          _type_index = T::SGetTypeIndex();
-        size_t                       element_count = this->Get()->m_OwnedComponents.count(_type_index);
+        NMemory::type_index _type_index   = T::SGetTypeIndex();
+        size_t              element_count = this->Get()->m_OwnedComponents.count(_type_index);
         if (element_count == 0)
                 return std::vector<ComponentHandle>();
 
-        auto                         kvs         = this->Get()->m_OwnedComponents.equal_range(_type_index);
+        auto                         kvs = this->Get()->m_OwnedComponents.equal_range(_type_index);
         std::vector<ComponentHandle> out;
         out.reserve(element_count);
         std::for_each(kvs.first, kvs.second, [&](auto e) { out.push_back(ComponentHandle(_type_index, e.second)); });

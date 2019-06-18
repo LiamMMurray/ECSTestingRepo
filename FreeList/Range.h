@@ -1,10 +1,10 @@
 #pragma once
 #include "Memory.h"
- template <typename T>
- class range_iterator;
+template <typename T>
+class range_iterator;
 
- template <typename T>
- class range
+template <typename T>
+class range
 {
     public:
         friend class range_iterator<T>;
@@ -40,8 +40,8 @@
         }
 };
 
- template <typename T>
- class range_iterator
+template <typename T>
+class range_iterator
 {
     private:
         range<T>& _range;
@@ -92,12 +92,15 @@ class active_range
         typedef T&                       reference;
 
     private:
-        size_type               size;
-        pointer                 data;
-        NMemory::dynamic_bitset isActives;
+        size_type                size;
+        pointer                  data;
+        NMemory::dynamic_bitset& isActives;
 
     public:
-        active_range(pointer data, size_type size) : data(data), size(size)
+        active_range(pointer data, size_type size, NMemory::dynamic_bitset& isActives) :
+            data(data),
+            size(size),
+            isActives(isActives)
         {}
 
         iterator begin()
@@ -122,11 +125,14 @@ class active_range_iterator
 {
     private:
         active_range<T>& _range;
-        ptrdiff_t        current_offset;
+        size_t           current_offset;
 
     public:
-        active_range_iterator(active_range<T>& _range, ptrdiff_t _offset) : _range(_range), current_offset(_offset)
-        {}
+        active_range_iterator(active_range<T>& _range, size_t _offset) : _range(_range), current_offset(_offset)
+        {
+                if (_offset < _range.size && !_range.isActives[_offset])
+                        operator++();
+        }
         bool operator==(active_range_iterator<T> other) const
         {
                 return this->current_offset == other.current_offset;
@@ -141,13 +147,19 @@ class active_range_iterator
         }
         active_range_iterator& operator++()
         {
-                ++current_offset;
+                do
+                {
+                        current_offset++;
+                } while (current_offset < _range.size && !_range.isActives[current_offset]);
                 return *this;
         }
         active_range_iterator operator++(int)
         {
                 active_range_iterator clone(_range, current_offset);
-                ++current_offset;
+                do
+                {
+                        ++current_offset;
+                } while (current_offset < _range.size && !_range.isActives[current_offset]);
                 return clone;
         }
 };

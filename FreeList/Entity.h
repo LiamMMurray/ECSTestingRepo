@@ -7,8 +7,6 @@
 
 struct Entity : IPoolElement
 {
-
-
         static NMemory::index s_max_elements;
 
         static void           SSetMaxElements(NMemory::index max_elements);

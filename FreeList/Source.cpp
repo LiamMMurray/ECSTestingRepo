@@ -77,8 +77,8 @@ index rand_exclude_range(std::vector<index>& indices, index min, index max)
 
 int _main()
 {
-        memsize        alloc_size_request      = 80000000;
-        byte* debug_address           = 0;
+        memsize alloc_size_request             = 80000000;
+        byte*   debug_address                  = 0;
         GameMemory_Singleton::GameMemory_Start = NMemory::ReserveGameMemory(alloc_size_request);
         debug_address                          = GameMemory_Singleton::GameMemory_Start;
         assert(GameMemory_Singleton::GameMemory_Start != 0);
@@ -121,6 +121,13 @@ int _main()
                 cHandles[i].Get<TransformComponent>()->b = 1000 + i;
                 cHandles[i].Get<TransformComponent>()->c = 10000 + i;
                 cHandles[i].Get<TransformComponent>()->d = 100000 + i;
+                
+        }
+        int _incrementer = 0;
+        for (auto& c : handleManager.GetActiveComponents<TransformComponent>())
+        {
+                _incrementer++;
+                int pause = 0;
         }
         size_t idx_offset = 0;
         size_t idx_end    = cHandles.size() + 1000;
@@ -179,12 +186,18 @@ int _main()
                 }
         }
 
-		
-		auto components = eHandles[0].GetComponents<TransformComponent>();
-        auto esfafw = eHandles[0].GetComponent<TransformComponent>();
-        incrementer = 0;
+
+
+        auto components = eHandles[0].GetComponents<TransformComponent>();
+        auto esfafw     = eHandles[0].GetComponent<TransformComponent>();
+        incrementer     = 0;
         for (auto& c : handleManager.GetComponents<TransformComponent>())
         {
+                incrementer++;
+                int pause = 0;
+        }
+        incrementer = 0;
+        for (auto& c : handleManager.GetActiveComponents<TransformComponent>()) {
                 incrementer++;
                 int pause = 0;
         }

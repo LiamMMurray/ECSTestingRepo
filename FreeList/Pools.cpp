@@ -185,13 +185,15 @@ namespace NMemory
                                 byte* last_element_mem    = mem_start + last_element_index * element_size;
                                 byte* deleted_element_mem = mem_start + deleted_element_index * element_size;
 
-                                // call the element's destructor
+                                // call the element's virtual destructor
                                 IPoolElement* pool_element_interface = reinterpret_cast<IPoolElement*>(deleted_element_mem);
                                 pool_element_interface->~IPoolElement();
 
                                 // copy over the deleted element's data with last element's data
                                 memcpy(deleted_element_mem, last_element_mem, element_size);
-
+                                component_random_access_pools.m_element_isactives[pool_index][deleted_element_index] =
+                                    component_random_access_pools.m_element_isactives[pool_index][last_element_index];
+                                component_random_access_pools.m_element_isactives[pool_index][last_element_index] = false;
                                 // get the handle of the last element that is copying over the deleted element
                                 pool_element_interface              = reinterpret_cast<IPoolElement*>(last_element_mem);
                                 ComponentHandle last_element_handle = {pool_element_interface->m_pool_index,
@@ -217,17 +219,19 @@ namespace NMemory
                 {
                         index next_free = component_random_access_pools.m_free_redirection_indices[pool_index].top();
                         component_random_access_pools.m_free_redirection_indices[pool_index].pop();
-                        component_random_access_pools.m_redirection_indices[pool_index][next_free] =
-                            component_random_access_pools.m_element_counts[pool_index];
 
                         index   element_index       = component_random_access_pools.m_element_counts[pool_index];
+                        component_random_access_pools.m_redirection_indices[pool_index][next_free] = element_index;
+
                         byte*   elemement_mem_start = component_random_access_pools.m_mem_starts[pool_index];
                         memsize elemement_size      = component_random_access_pools.m_elment_byte_sizes[pool_index];
                         byte*   element_mem         = elemement_mem_start + element_index * elemement_size;
 
-                        component_random_access_pools.m_element_isactives[pool_index][next_free] = true;
+                        component_random_access_pools.m_element_isactives[pool_index][element_index] = true;
 
                         component_random_access_pools.m_element_counts[pool_index]++;
+
+						// it is important that this assert is <= and not <
                         assert(component_random_access_pools.m_element_counts[pool_index] <=
                                component_random_access_pools.m_element_capacities[pool_index]);
 
