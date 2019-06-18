@@ -172,6 +172,7 @@ Entity* EntityHandle::Get()
 
 void EntityHandle::Free()
 {
+        this->FreeComponents();
         handleContext->FreeEntity(*this);
 }
 
