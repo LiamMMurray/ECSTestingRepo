@@ -1,7 +1,7 @@
 #pragma once
 #include <queue>
+#include <unordered_map>
 #include <vector>
-
 namespace NMemory
 {
         // todo forward declare typedefs (requires forward declaring std::containers)
@@ -17,6 +17,8 @@ namespace NMemory
         typedef std::vector<index>                delete_requests;
         typedef std::priority_queue<index, type_indices, std::greater<index>> index_priority_queue;
         typedef size_t                                                        entity_index;
+        typedef std::unordered_multimap<type_index, index>                    entity_component_container;
+        typedef std::pair<entity_component_container::iterator, entity_component_container::iterator> entity_components;
 
         struct GameMemory_Singleton
         {

@@ -3,8 +3,8 @@
 #include "IComponent.h"
 
 HandleManager::HandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
-                               NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
-                               NMemory::byte*                      dynamic_memory) :
+                             NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
+                             NMemory::byte*                      dynamic_memory) :
     component_random_access_pools(componentRandomAccessPools),
     entity_random_access_pools(entityRandomAccessPools),
     dynamic_memory(dynamic_memory),
@@ -94,6 +94,13 @@ void HandleManager::ShutDown()
 {
         NMemory::NPools::ClearPools(component_random_access_pools);
         NMemory::NPools::ClearPools(entity_random_access_pools);
+}
+
+range<Entity> HandleManager::GetEntities()
+{
+        Entity* data          = reinterpret_cast<Entity*>(entity_random_access_pools.m_mem_starts[0]);
+        size_t  element_count = static_cast<size_t>(entity_random_access_pools.m_element_counts[0]);
+        return range<Entity>(data, element_count);
 }
 
 ComponentHandle::ComponentHandle(NMemory::type_index pool_index, NMemory::index redirection_index) :

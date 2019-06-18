@@ -78,7 +78,7 @@ index rand_exclude_range(std::vector<index>& indices, index min, index max)
 int _main()
 {
         memsize        alloc_size_request      = 80000000;
-        NMemory::byte* debug_address           = 0;
+        byte* debug_address           = 0;
         GameMemory_Singleton::GameMemory_Start = NMemory::ReserveGameMemory(alloc_size_request);
         debug_address                          = GameMemory_Singleton::GameMemory_Start;
         assert(GameMemory_Singleton::GameMemory_Start != 0);
@@ -158,7 +158,7 @@ int _main()
                         assert(valid_ptr != 0);
                 }
         }
-        //for (size_t i = 0; i < 100; i++)
+        // for (size_t i = 0; i < 100; i++)
         //{
         //        handleManager.AddComponent<TransformComponent>(eHandles[i]);
         //}
@@ -179,18 +179,38 @@ int _main()
                 }
         }
 
-
+		
+		auto components = eHandles[0].GetComponents<TransformComponent>();
+        auto esfafw = eHandles[0].GetComponent<TransformComponent>();
         incrementer = 0;
-		for (auto& e : handleManager.GetComponents<TransformComponent>()) {
+        for (auto& c : handleManager.GetComponents<TransformComponent>())
+        {
                 incrementer++;
                 int pause = 0;
-		}
-
-
+        }
+        incrementer = 0;
+        for (auto c : handleManager.GetComponents<TransformComponent>())
+        {
+                incrementer++;
+                int pause = 0;
+        }
+        incrementer = 0;
+        for (auto& e : handleManager.GetEntities())
+        {
+                incrementer++;
+                int pause = 0;
+        }
+        incrementer = 0;
+        for (auto e : handleManager.GetEntities())
+        {
+                incrementer++;
+                int pause = 0;
+        }
         int* new_data = new int[5];
         for (auto i = 0; i < 5; i++)
         {
                 new_data[i] = i * 3;
+                int pause   = 0;
         }
 
         range<int> _range(new_data, 5);
