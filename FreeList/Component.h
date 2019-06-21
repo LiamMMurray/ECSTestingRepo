@@ -2,6 +2,8 @@
 #include "IComponent.h"
 #include "Memory.h"
 #include "TypeIndexFactory.h"
+#include "ComponentHandle.h"
+struct HandleManager;
 
 template <typename T>
 class Component : public IComponent
@@ -9,7 +11,7 @@ class Component : public IComponent
     private:
         static const NMemory::type_index s_type_index;
         static NMemory::index            s_max_elements;
-
+        static HandleManager*            s_handle_context;
     public:
         Component();
         ~Component();
@@ -17,6 +19,7 @@ class Component : public IComponent
         static const NMemory::type_index SGetTypeIndex();
         static void                      SSetMaxElements(NMemory::index max_elements);
         static NMemory::index            SGetMaxElements();
+		ComponentHandle GetHandle();
 };
 template <class T>
 const NMemory::type_index Component<T>::s_type_index = TypeIndexFactory<IComponent>::GetTypeIndex<T>();
@@ -55,4 +58,10 @@ template <typename T>
 inline NMemory::index Component<T>::SGetMaxElements()
 {
         return s_max_elements;
+}
+
+template <typename T>
+inline ComponentHandle Component<T>::GetHandle()
+{
+        return ComponentHandle{m_pool_index, m_redirection_index};
 }

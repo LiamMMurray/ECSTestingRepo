@@ -1,7 +1,7 @@
 #include "HandleManager.h"
 #include "Entity.h"
 #include "IComponent.h"
-
+#include "Component.h"
 HandleManager::HandleManager(NMemory::NPools::RandomAccessPools& componentRandomAccessPools,
                              NMemory::NPools::RandomAccessPools& entityRandomAccessPools,
                              NMemory::byte*                      dynamic_memory) :
@@ -112,6 +112,9 @@ void HandleManager::ShutDown()
 
 range<Entity> HandleManager::GetEntities()
 {
+        if (entity_random_access_pools.m_mem_starts.size() == 0)
+                return range<Entity>(0, 0);
+
         Entity* data          = reinterpret_cast<Entity*>(entity_random_access_pools.m_mem_starts[0]);
         size_t  element_count = static_cast<size_t>(entity_random_access_pools.m_element_counts[0]);
         return range<Entity>(data, element_count);
@@ -119,7 +122,9 @@ range<Entity> HandleManager::GetEntities()
 
 active_range<Entity> HandleManager::GetActiveEntities()
 {
-        NMemory::type_index      pool_index    = 0;
+        if (entity_random_access_pools.m_mem_starts.size() == 0)
+                return active_range<Entity>::GetNullActiveRange();
+
         Entity*                  data          = reinterpret_cast<Entity*>(entity_random_access_pools.m_mem_starts[0]);
         size_t                   element_count = static_cast<size_t>(entity_random_access_pools.m_element_counts[0]);
         NMemory::dynamic_bitset& isActives     = entity_random_access_pools.m_element_isactives[0];
@@ -156,11 +161,11 @@ bool ComponentHandle::operator==(const ComponentHandle& other) const
         return other.pool_index == this->pool_index && other.redirection_index == this->redirection_index;
 }
 
-EntityHandle ComponentHandle::GetParent()
-{
-        NMemory::index parent_index = this->Get()->m_parent_redirection_index;
-        return EntityHandle(parent_index);
-}
+//EntityHandle ComponentHandle::GetParent()
+//{
+//        NMemory::index parent_index = this->Get()->m_parent_redirection_index;
+//        return EntityHandle(parent_index);
+//}
 
 EntityHandle::EntityHandle(NMemory::index redirection_index) : redirection_index(redirection_index)
 {}

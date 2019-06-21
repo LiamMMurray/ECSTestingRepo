@@ -96,11 +96,27 @@ int _main()
         std::unordered_map<ComponentHandle, bool> isActivesMap001;
         std::unordered_map<ComponentHandle, bool> isActivesMap002;
 
+
+		for (auto c : handleManager.GetComponents<TransformComponent>()) {
+                c.a = 5;
+		}
+
+        for (auto c : handleManager.GetActiveComponents<TransformComponent>())
+        {
+                c.a = 5;
+        }
+        for (auto c : handleManager.GetEntities())
+        {
+                int pause = 0;
+        }
+        for (auto c : handleManager.GetActiveEntities())
+        {
+                int pause = 0;
+        }
         for (size_t i = 0; i < 1000; i++)
         {
                 eHandles.push_back(handleManager.CreateEntity());
         }
-
         for (size_t i = 0; i < 1000; i++)
         {
                 cHandles.push_back(handleManager.AddComponent<TransformComponent>(eHandles[0]));
@@ -121,7 +137,6 @@ int _main()
                 cHandles[i].Get<TransformComponent>()->b = 1000 + i;
                 cHandles[i].Get<TransformComponent>()->c = 10000 + i;
                 cHandles[i].Get<TransformComponent>()->d = 100000 + i;
-                
         }
         int _incrementer = 0;
         for (auto& c : handleManager.GetActiveComponents<TransformComponent>())
@@ -187,9 +202,8 @@ int _main()
         }
 
 
-
         auto components = eHandles[0].GetComponents<TransformComponent>();
-        auto esfafw     = eHandles[0].GetComponent<TransformComponent>();
+        auto esfafw     = eHandles[0].GetComponentHandle<TransformComponent>();
         incrementer     = 0;
         for (auto& c : handleManager.GetComponents<TransformComponent>())
         {
@@ -197,7 +211,8 @@ int _main()
                 int pause = 0;
         }
         incrementer = 0;
-        for (auto& c : handleManager.GetActiveComponents<TransformComponent>()) {
+        for (auto& c : handleManager.GetActiveComponents<TransformComponent>())
+        {
                 incrementer++;
                 int pause = 0;
         }

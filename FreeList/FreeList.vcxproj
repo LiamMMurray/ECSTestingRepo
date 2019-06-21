@@ -163,6 +163,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h" />
+    <ClInclude Include="ComponentHandle.h" />
+    <ClInclude Include="EntityHandle.h" />
     <ClInclude Include="IComponent.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="IPoolElement.h" />
