@@ -20,6 +20,8 @@ namespace NMemory
         typedef std::unordered_multimap<type_index, index>                    entity_component_container;
         typedef std::pair<entity_component_container::iterator, entity_component_container::iterator> entity_components;
 
+        constexpr unsigned filter_size = 64u;
+
         struct GameMemory_Singleton
         {
             public:

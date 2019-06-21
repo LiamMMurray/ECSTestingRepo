@@ -54,6 +54,27 @@ class PhysicsComponent : public Component<PhysicsComponent>
         float d001;
 };
 
+
+class RagdollComponent : public Component<RagdollComponent>
+{};
+
+
+class AComponent : public Component<AComponent>
+{};
+class BComponent : public Component<BComponent>
+{};
+class CComponent : public Component<CComponent>
+{};
+class DComponent : public Component<DComponent>
+{};
+struct declar
+{
+        int a = AComponent::SGetTypeIndex();
+        int b = BComponent::SGetTypeIndex();
+        int c = CComponent::SGetTypeIndex();
+        int d = DComponent::SGetTypeIndex();
+};
+
 #include "HandleManager.h"
 
 using namespace NMemory;
@@ -61,7 +82,8 @@ using namespace NMemory::NPools;
 
 index rand_range(index min, index max)
 {
-        return static_cast<index>(rand()) % max + min;
+        index range = max + 1 - min;
+        return static_cast<index>(rand()) % range + min;
 }
 
 index rand_exclude_range(std::vector<index>& indices, index min, index max)
@@ -75,173 +97,86 @@ index rand_exclude_range(std::vector<index>& indices, index min, index max)
         return out;
 }
 
+#include <bitset>
+#include <type_traits>
+#include <vector>
+
+template <typename... Ts>
+typename std::enable_if<sizeof...(Ts) == 0>::type GetTypeFilter(std::bitset<NMemory::filter_size>& filterFlags)
+{}
+
+template <typename T, typename... Ts>
+void GetTypeFilter(std::bitset<filter_size>& filterFlags)
+{
+        filterFlags[T::SGetTypeIndex()] = true;
+        return GetTypeFilter<Ts...>(filterFlags);
+}
+struct FHandleManager
+{
+
+        std::unordered_map<std::bitset<filter_size>, std::vector<NMemory::type_index>> cached_filter_searches;
+        std::bitset<filter_size>                                                       dirty_filters;
+
+        void Search(std::bitset<filter_size>& search_filter, std::vector<std::bitset<filter_size>>& group_filters)
+        {
+                std::vector<NMemory::type_index> out;
+                for (int i = 0; i < group_filters.size(); i++)
+                {
+                        auto _b = group_filters[i];
+                        _b &= search_filter;
+                        _b ^= search_filter;
+                        if (_b.none())
+                                out.push_back(i);
+                }
+                cached_filter_searches[search_filter] = out;
+        }
+        bool AlreadyExists(std::bitset<filter_size> _filter)
+        {
+                return false;
+        }
+        void FAddComponentGroup(std::bitset<filter_size> _filter)
+        {
+                if (AlreadyExists(_filter)) {}
+                else
+                {
+                        dirty_filters |= _filter;
+                }
+        }
+};
 int _main()
 {
-        memsize alloc_size_request             = 80000000;
-        byte*   debug_address                  = 0;
-        GameMemory_Singleton::GameMemory_Start = NMemory::ReserveGameMemory(alloc_size_request);
-        debug_address                          = GameMemory_Singleton::GameMemory_Start;
-        assert(GameMemory_Singleton::GameMemory_Start != 0);
-        GameMemory_Singleton::GameMemory_Curr = GameMemory_Singleton::GameMemory_Start;
-        GameMemory_Singleton::GameMemory_Max  = GameMemory_Singleton::GameMemory_Start + alloc_size_request;
+        declar                   d;
+        int                      TypeCount = TypeIndexFactory<IComponent>::GetTypeIndex<void>();
+        std::bitset<filter_size> filter;
+        assert(filter_size >= TypeCount);
 
-        RandomAccessPools componentRandomAccessPools;
-        RandomAccessPools entityRandomAccessPools;
-        HandleManager handleManager(componentRandomAccessPools, entityRandomAccessPools, GameMemory_Singleton::GameMemory_Curr);
-
-        TransformComponent::SSetMaxElements(9000);
-        std::vector<ComponentHandle>              cHandles;
-        std::vector<EntityHandle>                 eHandles;
-        dynamic_bitset                            isActives;
-        std::unordered_map<ComponentHandle, bool> isActivesMap001;
-        std::unordered_map<ComponentHandle, bool> isActivesMap002;
-
-        for (size_t i = 0; i < 1000; i++)
+        std::vector<std::bitset<filter_size>> rand_filters(1000);
+        for (auto& b : rand_filters)
         {
-                eHandles.push_back(handleManager.CreateEntity());
-        }
-
-        for (size_t i = 0; i < 1000; i++)
-        {
-                cHandles.push_back(handleManager.AddComponent<TransformComponent>(eHandles[0]));
-                if (rand() % 2 == 1)
+                for (int i = 0; i < filter_size; i++)
                 {
-                        cHandles[i].SetIsActive(false);
-                        isActives.push_back(false);
-                        assert(cHandles[i].IsActive() == false);
-                        isActivesMap001[cHandles[i]] = false;
-                }
-                else
-                {
-                        isActives.push_back(true);
-                        assert(cHandles[i].IsActive() == true);
-                        isActivesMap001[cHandles[i]] = true;
-                }
-                cHandles[i].Get<TransformComponent>()->a = i;
-                cHandles[i].Get<TransformComponent>()->b = 1000 + i;
-                cHandles[i].Get<TransformComponent>()->c = 10000 + i;
-                cHandles[i].Get<TransformComponent>()->d = 100000 + i;
-                
-        }
-        int _incrementer = 0;
-        for (auto& c : handleManager.GetActiveComponents<TransformComponent>())
-        {
-                _incrementer++;
-                int pause = 0;
-        }
-        size_t idx_offset = 0;
-        size_t idx_end    = cHandles.size() + 1000;
-        for (size_t i = cHandles.size(); i < idx_end; i++)
-        {
-                cHandles.push_back(handleManager.AddComponent<PhysicsComponent>(eHandles[idx_offset]));
-                cHandles[i].Get<PhysicsComponent>()->a000 = idx_offset;
-                cHandles[i].Get<PhysicsComponent>()->a001 = 2000 + idx_offset;
-                cHandles[i].Get<PhysicsComponent>()->b000 = 20000 + idx_offset;
-                cHandles[i].Get<PhysicsComponent>()->b001 = 200000 + idx_offset;
-                cHandles[i].Get<PhysicsComponent>()->c000 = 999999;
-                cHandles[i].Get<PhysicsComponent>()->c001 = 999999;
-                cHandles[i].Get<PhysicsComponent>()->d000 = 777777;
-                cHandles[i].Get<PhysicsComponent>()->d001 = 777777;
-                idx_offset++;
-        }
-        index              max_handle_index = cHandles.back().redirection_index;
-        std::vector<index> deleted_handles;
-        for (size_t i = 0; i < 100; i++)
-        {
-                index idx = rand_exclude_range(deleted_handles, 0, max_handle_index);
-                deleted_handles.push_back(idx);
-                cHandles[idx].Free();
-        }
-        for (size_t i = 0; i < 1000; i++)
-        {
-                if (std::find(deleted_handles.begin(), deleted_handles.end(), i) != deleted_handles.end())
-                {
-                        auto* null_ptr = ComponentHandle(0, i).Get<TransformComponent>();
-                        assert(null_ptr == 0);
-                }
-                else
-                {
-                        auto* valid_ptr = ComponentHandle(0, i).Get<TransformComponent>();
-                        assert(valid_ptr != 0);
+                        b[i] = rand() % 2;
                 }
         }
-        // for (size_t i = 0; i < 100; i++)
-        //{
-        //        handleManager.AddComponent<TransformComponent>(eHandles[i]);
-        //}
-        for (size_t i = 0; i < cHandles.size(); i++)
+        std::vector<std::bitset<filter_size>>    rand_search_filters(1000);
+        std::vector<std::vector<NMemory::index>> rand_search_filters_flagged_bits;
+        for (auto& b : rand_search_filters)
         {
-                isActivesMap002[cHandles[i]] = cHandles[i].IsActive();
-        }
-
-        int incrementer = 0;
-        for (auto kv : isActivesMap001)
-        {
-                // this handle is not deleted
-                if (std::find(deleted_handles.begin(), deleted_handles.end(), kv.first.redirection_index) ==
-                    deleted_handles.end())
+                size_t                      num_filter_flags = rand_range(2, 19);
+                std::vector<NMemory::index> flagged_bits;
+                for (size_t i = 0; i < num_filter_flags; i++)
                 {
-                        assert(kv.second == isActivesMap002[kv.first]);
-                        incrementer++;
+                        auto idx = rand_exclude_range(flagged_bits, 0, filter_size - 1);
+                        flagged_bits.push_back(idx);
+                        b[idx] = 1;
                 }
+                rand_search_filters_flagged_bits.push_back(flagged_bits);
         }
-
-
-
-        auto components = eHandles[0].GetComponents<TransformComponent>();
-        auto esfafw     = eHandles[0].GetComponent<TransformComponent>();
-        incrementer     = 0;
-        for (auto& c : handleManager.GetComponents<TransformComponent>())
+        FHandleManager hm;
+        for (auto& b : rand_search_filters)
         {
-                incrementer++;
-                int pause = 0;
+                hm.Search(b, rand_filters);
         }
-        incrementer = 0;
-        for (auto& c : handleManager.GetActiveComponents<TransformComponent>()) {
-                incrementer++;
-                int pause = 0;
-        }
-        incrementer = 0;
-        for (auto c : handleManager.GetComponents<TransformComponent>())
-        {
-                incrementer++;
-                int pause = 0;
-        }
-        incrementer = 0;
-        for (auto& e : handleManager.GetEntities())
-        {
-                incrementer++;
-                int pause = 0;
-        }
-        incrementer = 0;
-        for (auto e : handleManager.GetEntities())
-        {
-                incrementer++;
-                int pause = 0;
-        }
-        int* new_data = new int[5];
-        for (auto i = 0; i < 5; i++)
-        {
-                new_data[i] = i * 3;
-                int pause   = 0;
-        }
-
-        range<int> _range(new_data, 5);
-        for (auto i = _range.begin(); i != _range.end(); i++)
-        {
-                int test  = (*i);
-                int pause = 0;
-        }
-        for (auto& i : _range)
-        {
-                i += 2;
-        }
-        for (auto i = _range.begin(); i != _range.end(); i++)
-        {
-                int test  = (*i);
-                int pause = 0;
-        }
-        delete[] new_data;
         return 0;
 }
 
@@ -249,8 +184,6 @@ int _main()
 int main()
 {
         _main();
-
-        NMemory::FreeGameMemory();
 
         _CrtDumpMemoryLeaks();
 
